@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - B2B MarketPlace</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-store me-2"></i>B2B MarketPlace
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="products.html">
+                            <i class="fas fa-boxes me-1"></i>Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login/Signup
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">
+                            <i class="fas fa-envelope me-1"></i>Contact
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="bg-light-custom" style="margin-top: 76px; padding: 3rem 0;">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h1 class="display-5 fw-bold text-primary">Product Catalog</h1>
+                    <p class="lead text-muted-custom">Discover thousands of quality products from verified wholesalers</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filters and Search -->
+    <section class="py-4 bg-white border-bottom">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search products..." aria-label="Search products">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 mt-3 mt-md-0">
+                    <select class="form-select">
+                        <option selected>All Categories</option>
+                        <option value="fashion">Fashion & Apparel</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="home">Home & Garden</option>
+                        <option value="industrial">Industrial</option>
+                        <option value="sports">Sports & Outdoors</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 mt-3 mt-lg-0">
+                    <select class="form-select">
+                        <option selected>Sort by Price</option>
+                        <option value="low">Price: Low to High</option>
+                        <option value="high">Price: High to Low</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="newest">Newest First</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="row">
+                <!-- Product 1 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-tshirt" style="font-size: 3rem; color: #D97706; margin-bottom: 1rem;"></i>
+                                <p style="color: #92400E; margin: 0; font-weight: 600;">Fashion</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Premium Cotton T-Shirts</h5>
+                                <span class="badge bg-success">In Stock</span>
+                            </div>
+                            <p class="card-text">High-quality 100% cotton t-shirts in various sizes and colors. Perfect for retail stores and promotional events.</p>
+                            <div class="product-price">$12.99 - $18.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 50 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-mobile-alt" style="font-size: 3rem; color: #2563EB; margin-bottom: 1rem;"></i>
+                                <p style="color: #1E40AF; margin: 0; font-weight: 600;">Electronics</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Smartphone Accessories</h5>
+                                <span class="badge bg-warning text-dark">Limited</span>
+                            </div>
+                            <p class="card-text">Premium phone cases, screen protectors, and wireless chargers compatible with latest smartphone models.</p>
+                            <div class="product-price">$8.99 - $45.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 20 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-couch" style="font-size: 3rem; color: #059669; margin-bottom: 1rem;"></i>
+                                <p style="color: #047857; margin: 0; font-weight: 600;">Home & Garden</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Modern Home Decor</h5>
+                                <span class="badge bg-success">Bestseller</span>
+                            </div>
+                            <p class="card-text">Contemporary furniture and decorative items to enhance any living space. Stylish and affordable options available.</p>
+                            <div class="product-price">$24.99 - $299.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 10 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-dumbbell" style="font-size: 3rem; color: #DC2626; margin-bottom: 1rem;"></i>
+                                <p style="color: #B91C1C; margin: 0; font-weight: 600;">Sports & Fitness</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Fitness Equipment</h5>
+                                <span class="badge bg-info text-dark">New</span>
+                            </div>
+                            <p class="card-text">Professional-grade fitness equipment and accessories for gyms, personal trainers, and fitness enthusiasts.</p>
+                            <div class="product-price">$35.99 - $899.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 5 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 5 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-laptop" style="font-size: 3rem; color: #4F46E5; margin-bottom: 1rem;"></i>
+                                <p style="color: #3730A3; margin: 0; font-weight: 600;">Technology</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Computer Accessories</h5>
+                                <span class="badge bg-primary">Popular</span>
+                            </div>
+                            <p class="card-text">High-performance computer peripherals including keyboards, mice, headsets, and office accessories.</p>
+                            <div class="product-price">$15.99 - $149.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 25 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 6 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-gem" style="font-size: 3rem; color: #7C3AED; margin-bottom: 1rem;"></i>
+                                <p style="color: #5B21B6; margin: 0; font-weight: 600;">Jewelry & Accessories</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Fashion Jewelry Collection</h5>
+                                <span class="badge bg-success">Trending</span>
+                            </div>
+                            <p class="card-text">Elegant jewelry pieces and fashion accessories perfect for retail boutiques and gift shops.</p>
+                            <div class="product-price">$9.99 - $89.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 30 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 7 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #FEF7CD 0%, #FEF08A 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-tools" style="font-size: 3rem; color: #CA8A04; margin-bottom: 1rem;"></i>
+                                <p style="color: #A16207; margin: 0; font-weight: 600;">Tools & Hardware</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Professional Tool Sets</h5>
+                                <span class="badge bg-warning text-dark">Sale</span>
+                            </div>
+                            <p class="card-text">Professional-grade tools and hardware supplies for construction, maintenance, and DIY projects.</p>
+                            <div class="product-price">$29.99 - $199.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 15 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 8 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-seedling" style="font-size: 3rem; color: #16A34A; margin-bottom: 1rem;"></i>
+                                <p style="color: #15803D; margin: 0; font-weight: 600;">Garden & Outdoor</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Garden Supplies</h5>
+                                <span class="badge bg-success">Seasonal</span>
+                            </div>
+                            <p class="card-text">Complete range of gardening tools, plant containers, and outdoor equipment for garden centers and landscapers.</p>
+                            <div class="product-price">$12.99 - $149.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 20 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 9 -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div style="height: 250px; background: linear-gradient(135deg, #FDF2F8 0%, #FCE7F3 100%); display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center">
+                                <i class="fas fa-baby" style="font-size: 3rem; color: #EC4899; margin-bottom: 1rem;"></i>
+                                <p style="color: #BE185D; margin: 0; font-weight: 600;">Baby & Kids</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title">Children's Products</h5>
+                                <span class="badge bg-primary">Featured</span>
+                            </div>
+                            <p class="card-text">Safe and high-quality baby and children's products including toys, clothing, and essential accessories.</p>
+                            <div class="product-price">$8.99 - $79.99</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Min. Order: 25 pcs</small>
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-custom-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Product pages navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">3</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section-padding bg-white">
+        <div class="container">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <h3>Can't Find What You're Looking For?</h3>
+                    <p class="lead text-muted-custom mb-4">Contact our team to help you source specific products or connect with suppliers in your industry.</p>
+                    <a href="contact.html" class="btn-custom-primary me-3">
+                        <i class="fas fa-envelope me-2"></i>Contact Us
+                    </a>
+                    <a href="login.html" class="btn-custom-secondary">
+                        <i class="fas fa-user-plus me-2"></i>Become a Supplier
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5><i class="fas fa-store me-2"></i>B2B MarketPlace</h5>
+                    <p class="text-muted">Connecting retailers and wholesalers worldwide with a trusted, secure, and efficient B2B trading platform.</p>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>Categories</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="products.html">Fashion & Apparel</a></li>
+                        <li><a href="products.html">Electronics</a></li>
+                        <li><a href="products.html">Home & Garden</a></li>
+                        <li><a href="products.html">Industrial</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6>Support</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="contact.html">Help Center</a></li>
+                        <li><a href="contact.html">Customer Service</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 B2B MarketPlace. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-muted me-3"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-muted me-3"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-muted me-3"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="text-muted"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
