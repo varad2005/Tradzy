@@ -1,130 +1,143 @@
-import requests
-import json
-from time import sleep
+"""End-to-end smoke tests executed in-process via Flask's test client.
 
-BASE_URL = 'http://localhost:5000/api'
+The legacy version of this module depended on ``requests`` and a running
+development server.  The tests now run entirely inside pytest and mirror the
+structure introduced in ``test_basic.py``.
+"""
 
-class Colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
+from __future__ import annotations
 
-def print_test(message):
-    print(f"\n{Colors.HEADER}=== {message} ==={Colors.ENDC}")
+from typing import Any, Dict
 
-def print_response(response, expected_status=200):
-    status = Colors.OKGREEN if response.status_code == expected_status else Colors.FAIL
-    print(f"{status}Status: {response.status_code}{Colors.ENDC}")
-    print(f"Response: {json.dumps(response.json(), indent=2)}")
+import pytest  # type: ignore
 
-def test_api():
-    session = requests.Session()
-    
-    try:
-        # 1. Test API Connection
-        print_test("Testing API Connection")
-        response = session.get(f"{BASE_URL}/test")
-        print_response(response)
-        
-        if response.status_code != 200:
-            print(f"{Colors.FAIL}API not responding. Please make sure the Flask server is running.{Colors.ENDC}")
-            return
-        
-        # 2. Register Users
-        print_test("Registering Admin User")
-        admin_data = {
-            "username": "admin",
-            "password": "admin123",
-            "email": "admin@tradzy.com",
-            "role": "admin"
-        }
-        response = session.post(f"{BASE_URL}/register", json=admin_data)
-        print_response(response, 201)
-        
-        print_test("Registering Retailer")
-        retailer_data = {
-            "username": "shop1",
-            "password": "shop123",
-            "email": "shop@tradzy.com",
-            "role": "retailer"
-        }
-        response = session.post(f"{BASE_URL}/register", json=retailer_data)
-        print_response(response, 201)
-        
-        # 3. Test Login
-        print_test("Testing Admin Login")
-        login_data = {
-            "username": "admin",
-            "password": "admin123"
-        }
-        response = session.post(f"{BASE_URL}/login", json=login_data)
-        print_response(response)
-        
-        # 4. Test Admin Functions
-        print_test("Getting User List (Admin)")
-        response = session.get(f"{BASE_URL}/admin/users")
-        print_response(response)
-        
-        print_test("Getting System Stats (Admin)")
-        response = session.get(f"{BASE_URL}/admin/stats")
-        print_response(response)
-        
-        # 5. Login as Retailer
-        print_test("Testing Retailer Login")
-        login_data = {
-            "username": "shop1",
-            "password": "shop123"
-        }
-        response = session.post(f"{BASE_URL}/login", json=login_data)
-        print_response(response)
-        
-        # 6. Test Product Management
-        print_test("Adding New Product")
-        product_data = {
+
+def _register_user(client, *, username: str, email: str, password: str, role: str) -> Dict[str, Any]:
+    response = client.post(
+        "/api/auth/register",
+        json={
+            "username": username,
+            "password": password,
+            "email": email,
+            "role": role,
+        },
+    )
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data["message"] == "Registration successful"
+    return data
+
+
+def _login(client, *, email: str, password: str) -> Dict[str, Any]:
+    response = client.post(
+        "/api/auth/login",
+        json={
+            "email": email,
+            "password": password,
+        },
+    )
+    assert response.status_code == 200
+    return response.get_json()
+
+
+def _logout(client) -> None:
+    response = client.post("/api/auth/logout")
+    assert response.status_code == 200
+    assert response.get_json()["message"] == "Logged out successfully"
+
+
+
+
+def test_api_connection(client):
+    """API health endpoint should respond with a 200 status."""
+
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    assert response.get_json() == {"status": "ok"}
+
+
+def test_full_flow(client):
+    """Replicate the legacy end-to-end flow using in-process requests."""
+
+    admin_email = "admin@tradzy.com"
+    retailer_email = "shop@tradzy.com"
+
+    _register_user(
+        client,
+        username="admin",
+        email=admin_email,
+        password="admin123",
+        role="admin",
+    )
+    _register_user(
+        client,
+        username="shop1",
+        email=retailer_email,
+        password="shop123",
+        role="retailer",
+    )
+
+    admin_login = _login(client, email=admin_email, password="admin123")
+    assert admin_login["user"]["role"] == "admin"
+    assert admin_login["redirect"] == "/dashboard/admin"
+
+    users_response = client.get("/api/admin/users")
+    assert users_response.status_code == 200
+    users = users_response.get_json()
+    roles = {user["role"] for user in users}
+    assert roles.issuperset({"admin", "retailer"})
+
+    stats_response = client.get("/api/admin/stats")
+    assert stats_response.status_code == 200
+    stats = stats_response.get_json()
+    assert set(stats.keys()) == {"users", "products", "orders", "revenue"}
+
+    # Logging in a different user implicitly clears the previous session.
+    retailer_login = _login(client, email=retailer_email, password="shop123")
+    assert retailer_login["user"]["role"] == "retailer"
+    assert retailer_login["redirect"] == "/dashboard/retailer"
+
+    create_response = client.post(
+        "/api/products",
+        json={
             "name": "Test Product",
             "description": "This is a test product",
             "price": 99.99,
             "stock": 10,
-            "image_url": "https://example.com/test.jpg"
-        }
-        response = session.post(f"{BASE_URL}/products", json=product_data)
-        print_response(response, 201)
-        
-        # Get product list to get the ID
-        response = session.get(f"{BASE_URL}/products")
-        products = response.json()
-        if products:
-            product_id = products[0]['id']
-            
-            print_test("Updating Product")
-            update_data = {
-                "name": "Updated Product",
-                "description": "This is an updated test product",
-                "price": 149.99,
-                "stock": 20,
-                "image_url": "https://example.com/updated.jpg"
-            }
-            response = session.put(f"{BASE_URL}/products/{product_id}", json=update_data)
-            print_response(response)
-            
-            print_test("Deleting Product")
-            response = session.delete(f"{BASE_URL}/products/{product_id}")
-            print_response(response)
-        
-        # 7. Test Logout
-        print_test("Testing Logout")
-        response = session.post(f"{BASE_URL}/logout")
-        print_response(response)
-        
-        print(f"\n{Colors.OKGREEN}All tests completed successfully!{Colors.ENDC}")
-        
-    except requests.exceptions.ConnectionError:
-        print(f"{Colors.FAIL}Error: Could not connect to server. Make sure the Flask application is running.{Colors.ENDC}")
-    except Exception as e:
-        print(f"{Colors.FAIL}Error occurred: {str(e)}{Colors.ENDC}")
+            "image_url": "https://example.com/test.jpg",
+        },
+    )
+    assert create_response.status_code == 201
+
+    list_response = client.get("/api/products")
+    assert list_response.status_code == 200
+    products = list_response.get_json()
+    assert len(products) == 1
+    product_id = products[0]["id"]
+
+    update_response = client.put(
+        f"/api/products/{product_id}",
+        json={
+            "name": "Updated Product",
+            "description": "This is an updated test product",
+            "price": 149.99,
+            "stock": 20,
+            "image_url": "https://example.com/updated.jpg",
+        },
+    )
+    assert update_response.status_code == 200
+    assert update_response.get_json()["message"] == "Product updated successfully"
+
+    delete_response = client.delete(f"/api/products/{product_id}")
+    assert delete_response.status_code == 200
+    assert delete_response.get_json()["message"] == "Product deleted successfully"
+
+    final_list = client.get("/api/products")
+    assert final_list.status_code == 200
+    assert final_list.get_json() == []
+
+    _logout(client)
+
 
 if __name__ == "__main__":
-    test_api()
+    raise SystemExit(pytest.main([__file__]))

@@ -1,81 +1,102 @@
-from flask import Blueprint, request, jsonify, session
-from app import get_db_connection
-from functools import wraps
+from __future__ import annotations
 
-admin_bp = Blueprint('admin', __name__)
+from typing import Any
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session or session['role'] != 'admin':
-            return jsonify({'error': 'Unauthorized'}), 401
-        return f(*args, **kwargs)
-    return decorated_function
+from flask import Blueprint, jsonify, request
 
-@admin_bp.route('/api/admin/users', methods=['GET'])
-@admin_required
-def get_users():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        cursor.execute('SELECT id, username, email, role, created_at FROM users')
-        users = cursor.fetchall()
-        
-        cursor.close()
-        conn.close()
-        
-        return jsonify(users)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+from db import get_db
+from routes.auth import login_required, role_required
 
-@admin_bp.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
-@admin_required
-def delete_user(user_id):
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute('DELETE FROM users WHERE id = %s', (user_id,))
-        
-        conn.commit()
-        cursor.close()
-        conn.close()
-        
-        return jsonify({'message': 'User deleted successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
-@admin_bp.route('/api/admin/stats', methods=['GET'])
-@admin_required
-def get_stats():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        # Get total users by role
-        cursor.execute('''
-            SELECT role, COUNT(*) as count 
-            FROM users 
-            GROUP BY role
-        ''')
-        user_stats = cursor.fetchall()
-        
-        # Get total products
-        cursor.execute('SELECT COUNT(*) as total_products FROM products')
-        product_stats = cursor.fetchone()
-        
-        # Get total orders
-        cursor.execute('SELECT COUNT(*) as total_orders FROM orders')
-        order_stats = cursor.fetchone()
-        
-        cursor.close()
-        conn.close()
-        
-        return jsonify({
-            'users': user_stats,
-            'products': product_stats,
-            'orders': order_stats
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+
+@admin_bp.get("/users")
+@login_required
+@role_required(["admin"])
+def list_users() -> tuple[Any, int]:
+    db = get_db()
+    users = db.execute(
+        "SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC"
+    ).fetchall()
+    return jsonify([dict(user) for user in users]), 200
+
+
+@admin_bp.delete("/users/<int:user_id>")
+@login_required
+@role_required(["admin"])
+def remove_user(user_id: int) -> tuple[Any, int]:
+    db = get_db()
+    if db.execute("SELECT id FROM users WHERE id = ?", (user_id,)).fetchone() is None:
+        return jsonify({"error": "User not found"}), 404
+
+    db.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    db.commit()
+    return jsonify({"message": "User deleted successfully"}), 200
+
+
+@admin_bp.get("/stats")
+@login_required
+@role_required(["admin"])
+def platform_stats() -> tuple[Any, int]:
+    db = get_db()
+
+    user_totals = db.execute(
+        "SELECT role, COUNT(*) AS count FROM users GROUP BY role"
+    ).fetchall()
+
+    total_products = db.execute("SELECT COUNT(*) AS total FROM products").fetchone()
+    total_orders = db.execute("SELECT COUNT(*) AS total FROM orders").fetchone()
+    total_revenue = db.execute(
+        "SELECT COALESCE(SUM(total_amount), 0) AS revenue FROM orders"
+    ).fetchone()
+
+    return (
+        jsonify(
+            {
+                "users": [dict(row) for row in user_totals],
+                "products": total_products["total"] if total_products else 0,
+                "orders": total_orders["total"] if total_orders else 0,
+                "revenue": total_revenue["revenue"] if total_revenue else 0,
+            }
+        ),
+        200,
+    )
+
+
+@admin_bp.get("/orders")
+@login_required
+@role_required(["admin"])
+def list_orders() -> tuple[Any, int]:
+    db = get_db()
+    orders = db.execute(
+        """
+        SELECT o.id, o.user_id AS buyer_id, u.username AS buyer_username, o.total_amount,
+               o.status, o.created_at, COUNT(oi.id) AS item_count
+        FROM orders o
+        LEFT JOIN users u ON o.user_id = u.id
+        LEFT JOIN order_items oi ON oi.order_id = o.id
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+        """
+    ).fetchall()
+
+    return jsonify([dict(order) for order in orders]), 200
+
+
+@admin_bp.patch("/orders/<int:order_id>")
+@login_required
+@role_required(["admin"])
+def update_order_status(order_id: int) -> tuple[Any, int]:
+    payload = request.get_json() or {}
+    status = payload.get("status")
+    if status not in {"pending", "confirmed", "shipped", "delivered", "cancelled"}:
+        return jsonify({"error": "Invalid status"}), 400
+
+    db = get_db()
+    if db.execute("SELECT id FROM orders WHERE id = ?", (order_id,)).fetchone() is None:
+        return jsonify({"error": "Order not found"}), 404
+
+    db.execute("UPDATE orders SET status = ? WHERE id = ?", (status, order_id))
+    db.commit()
+
+    return jsonify({"message": "Order status updated"}), 200

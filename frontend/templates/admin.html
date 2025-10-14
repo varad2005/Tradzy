@@ -59,27 +59,55 @@
         </div>
     </div>
 
+    <!-- Include API JavaScript file for authentication functions -->
+    <script src="/static/api.js"></script>
     <script>
-        // Form submission handling
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Form submission handling with real authentication
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
             
+            // Get email and password from form inputs
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
             if (email && password) {
-                // Simulate login process
+                // Get button reference and show loading state
                 const button = document.querySelector('.login-btn');
                 const originalText = button.innerHTML;
                 
                 button.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Logging in...';
                 button.disabled = true;
                 
-                setTimeout(() => {
-                    alert(`Login attempted with:\nEmail/Username: ${email}\nPassword: ${'*'.repeat(password.length)}\n\nIn a real application, this would authenticate with your backend server.`);
+                try {
+                    // Call the login function from api.js
+                    // This sends credentials to backend and receives JWT token
+                    const response = await login(email, password);
+                    
+                    // Login successful!
+                    console.log('Login successful:', response);
+                    
+                    // Check if user is admin
+                    if (response.user.role === 'admin') {
+                        // Show success message briefly
+                        alert('✅ Login successful! Welcome, Admin!');
+                        // Redirect to homepage
+                        window.location.href = '/';
+                    } else {
+                        // User is not admin
+                        alert('❌ Access Denied: You need admin privileges to access this portal.');
+                        // Clear the token since user doesn't have right role
+                        await logout();
+                    }
+                    
+                } catch (error) {
+                    // Login failed - show error message
+                    console.error('Login failed:', error);
+                    alert('❌ Login Failed:\n' + error.message + '\n\nPlease check your credentials and try again.');
+                } finally {
+                    // Reset button state
                     button.innerHTML = originalText;
                     button.disabled = false;
-                }, 2000);
+                }
             }
         });
 
@@ -98,6 +126,21 @@
             input.addEventListener('blur', function() {
                 this.parentElement.parentElement.style.transform = 'translateY(0)';
             });
+        });
+
+        // Check if user is already logged in when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            if (isLoggedIn()) {
+                const userRole = localStorage.getItem('userRole');
+                const username = localStorage.getItem('username');
+                console.log(`Already logged in as ${username} (${userRole})`);
+                
+                // You could auto-redirect or show a message here
+                if (userRole === 'admin') {
+                    // User is already logged in as admin
+                    console.log('User is already authenticated as admin');
+                }
+            }
         });
     </script>
 </body>

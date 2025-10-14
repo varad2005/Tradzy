@@ -18,8 +18,8 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="index.html">
-                <i class="fas fa-store me-2"></i>B2B MarketPlace
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-store me-2"></i>TRADZY
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
@@ -30,22 +30,22 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html">
+                        <a class="nav-link" href="/">
                             <i class="fas fa-home me-1"></i>Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="products.html">
+                        <a class="nav-link active" href="/products">
                             <i class="fas fa-boxes me-1"></i>Products
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="login.html">
+                        <a class="nav-link" href="/login">
                             <i class="fas fa-sign-in-alt me-1"></i>Login/Signup
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="contact.html">
+                        <a class="nav-link" href="/contact">
                             <i class="fas fa-envelope me-1"></i>Contact
                         </a>
                     </li>
@@ -72,421 +72,455 @@
             <div class="row align-items-center">
                 <div class="col-lg-6 col-md-8">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search products..." aria-label="Search products">
-                        <button class="btn btn-outline-secondary" type="button">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search products..." aria-label="Search products">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchProducts()">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-4 mt-3 mt-md-0">
-                    <select class="form-select">
-                        <option selected>All Categories</option>
-                        <option value="fashion">Fashion & Apparel</option>
-                        <option value="electronics">Electronics</option>
-                        <option value="home">Home & Garden</option>
-                        <option value="industrial">Industrial</option>
-                        <option value="sports">Sports & Outdoors</option>
+                    <select class="form-select" id="categoryFilter" onchange="filterProducts()">
+                        <option value="">All Categories</option>
+                        <option value="Fashion">Fashion & Apparel</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Home">Home & Kitchen</option>
+                        <option value="Industrial">Industrial</option>
+                        <option value="Sports">Sports & Fitness</option>
+                        <option value="Beauty">Beauty & Personal Care</option>
                     </select>
                 </div>
                 <div class="col-lg-3 mt-3 mt-lg-0">
-                    <select class="form-select">
-                        <option selected>Sort by Price</option>
-                        <option value="low">Price: Low to High</option>
-                        <option value="high">Price: High to Low</option>
-                        <option value="popular">Most Popular</option>
-                        <option value="newest">Newest First</option>
+                    <select class="form-select" id="sortSelect" onchange="sortProducts()">
+                        <option value="default">Default</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="name">Name: A to Z</option>
+                        <option value="stock">Stock: High to Low</option>
                     </select>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Products Grid -->
+    <!-- Products Grid - DYNAMIC CONTENT LOADED FROM API -->
     <section class="section-padding">
         <div class="container">
-            <div class="row">
-                <!-- Product 1 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-tshirt" style="font-size: 3rem; color: #D97706; margin-bottom: 1rem;"></i>
-                                <p style="color: #92400E; margin: 0; font-weight: 600;">Fashion</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Premium Cotton T-Shirts</h5>
-                                <span class="badge bg-success">In Stock</span>
-                            </div>
-                            <p class="card-text">High-quality 100% cotton t-shirts in various sizes and colors. Perfect for retail stores and promotional events.</p>
-                            <div class="product-price">₹250.00 - ₹450.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 50 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading products...</span>
                 </div>
-
-                <!-- Product 2 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-mobile-alt" style="font-size: 3rem; color: #2563EB; margin-bottom: 1rem;"></i>
-                                <p style="color: #1E40AF; margin: 0; font-weight: 600;">Electronics</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Smartphone Accessories</h5>
-                                <span class="badge bg-warning text-dark">Limited</span>
-                            </div>
-                            <p class="card-text">Premium phone cases, screen protectors, and wireless chargers compatible with latest smartphone models.</p>
-                            <div class="product-price">₹500.00 - ₹2500.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 20 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 3 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-couch" style="font-size: 3rem; color: #059669; margin-bottom: 1rem;"></i>
-                                <p style="color: #047857; margin: 0; font-weight: 600;">Home & Garden</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Modern Home Decor</h5>
-                                <span class="badge bg-success">Bestseller</span>
-                            </div>
-                            <p class="card-text">Contemporary furniture and decorative items to enhance any living space. Stylish and affordable options available.</p>
-                            <div class="product-price">₹1500.00 - ₹15000.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 10 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 4 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-dumbbell" style="font-size: 3rem; color: #DC2626; margin-bottom: 1rem;"></i>
-                                <p style="color: #B91C1C; margin: 0; font-weight: 600;">Sports & Fitness</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Fitness Equipment</h5>
-                                <span class="badge bg-info text-dark">New</span>
-                            </div>
-                            <p class="card-text">Professional-grade fitness equipment and accessories for gyms, personal trainers, and fitness enthusiasts.</p>
-                            <div class="product-price">₹2000.00 - ₹50000.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 5 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 5 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-laptop" style="font-size: 3rem; color: #4F46E5; margin-bottom: 1rem;"></i>
-                                <p style="color: #3730A3; margin: 0; font-weight: 600;">Technology</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Computer Accessories</h5>
-                                <span class="badge bg-primary">Popular</span>
-                            </div>
-                            <p class="card-text">High-performance computer peripherals including keyboards, mice, headsets, and office accessories.</p>
-                            <div class="product-price">₹1000.00 - ₹8000.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 25 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 6 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-gem" style="font-size: 3rem; color: #7C3AED; margin-bottom: 1rem;"></i>
-                                <p style="color: #5B21B6; margin: 0; font-weight: 600;">Jewelry & Accessories</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Fashion Jewelry Collection</h5>
-                                <span class="badge bg-success">Trending</span>
-                            </div>
-                            <p class="card-text">Elegant jewelry pieces and fashion accessories perfect for retail boutiques and gift shops.</p>
-                            <div class="product-price">₹500.00 - ₹5000.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 30 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 7 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #FEF7CD 0%, #FEF08A 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-tools" style="font-size: 3rem; color: #CA8A04; margin-bottom: 1rem;"></i>
-                                <p style="color: #A16207; margin: 0; font-weight: 600;">Tools & Hardware</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Professional Tool Sets</h5>
-                                <span class="badge bg-warning text-dark">Sale</span>
-                            </div>
-                            <p class="card-text">Professional-grade tools and hardware supplies for construction, maintenance, and DIY projects.</p>
-                            <div class="product-price">₹1500.00 - ₹10000.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 15 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 8 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-seedling" style="font-size: 3rem; color: #16A34A; margin-bottom: 1rem;"></i>
-                                <p style="color: #15803D; margin: 0; font-weight: 600;">Garden & Outdoor</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Garden Supplies</h5>
-                                <span class="badge bg-success">Seasonal</span>
-                            </div>
-                            <p class="card-text">Complete range of gardening tools, plant containers, and outdoor equipment for garden centers and landscapers.</p>
-                            <div class="product-price">₹800.00 - ₹7500.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 20 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product 9 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="product-card">
-                        <div style="height: 250px; background: linear-gradient(135deg, #FDF2F8 0%, #FCE7F3 100%); display: flex; align-items: center; justify-content: center;">
-                            <div class="text-center">
-                                <i class="fas fa-baby" style="font-size: 3rem; color: #EC4899; margin-bottom: 1rem;"></i>
-                                <p style="color: #BE185D; margin: 0; font-weight: 600;">Baby & Kids</p>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title">Children's Products</h5>
-                                <span class="badge bg-primary">Featured</span>
-                            </div>
-                            <p class="card-text">Safe and high-quality baby and children's products including toys, clothing, and essential accessories.</p>
-                            <div class="product-price">₹400.00 - ₹4000.00</div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">Min. Order: 25 pcs</small>
-                                <div>
-                                    <button class="btn btn-outline-primary btn-sm me-2">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                    <button class="btn btn-custom-primary btn-sm">
-                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <p class="mt-3 text-muted">Loading products from database...</p>
             </div>
 
-            <!-- Pagination -->
-            <nav aria-label="Product pages navigation" class="mt-5">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                    <li class="page-item active">
-                        <a class="page-link" href="#">1</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">2</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">3</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </section>
+            <!-- Error Message -->
+            <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span id="errorText"></span>
+            </div>
 
-    <!-- CTA Section -->
-    <section class="section-padding bg-white">
-        <div class="container">
-            <div class="row justify-content-center text-center">
-                <div class="col-lg-8">
-                    <h3>Can't Find What You're Looking For?</h3>
-                    <p class="lead text-muted-custom mb-4">Contact our team to help you source specific products or connect with suppliers in your industry.</p>
-                    <a href="contact.html" class="btn-custom-primary me-3">
-                        <i class="fas fa-envelope me-2"></i>Contact Us
-                    </a>
-                    <a href="login.html" class="btn-custom-secondary">
-                        <i class="fas fa-user-plus me-2"></i>Become a Supplier
-                    </a>
-                </div>
+            <!-- Products Container - Populated Dynamically -->
+            <div id="productsContainer" class="row">
+                <!-- Products will be inserted here via JavaScript -->
+            </div>
+
+            <!-- No Products Message -->
+            <div id="noProductsMessage" class="text-center py-5 d-none">
+                <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                <h4>No Products Found</h4>
+                <p class="text-muted">Try adjusting your search or filters</p>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="bg-dark text-light py-5">
         <div class="container">
             <div class="row">
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <h5><i class="fas fa-store me-2"></i>B2B MarketPlace</h5>
-                    <p class="text-muted">Connecting retailers and wholesalers worldwide with a trusted, secure, and efficient B2B trading platform.</p>
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="mb-3"><i class="fas fa-store me-2"></i>TRADZY</h5>
+                    <p class="text-muted">Your trusted B2B marketplace connecting retailers with verified wholesalers worldwide.</p>
                 </div>
-                
-                <div class="col-lg-2 col-md-6 mb-4">
-                    <h6>Quick Links</h6>
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h6 class="mb-3">Quick Links</h6>
                     <ul class="list-unstyled">
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="products.html">Products</a></li>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="/" class="text-muted">Home</a></li>
+                        <li><a href="/products" class="text-muted">Products</a></li>
+                        <li><a href="/login" class="text-muted">Login</a></li>
+                        <li><a href="/contact" class="text-muted">Contact</a></li>
                     </ul>
                 </div>
-                
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h6>Categories</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="products.html">Fashion & Apparel</a></li>
-                        <li><a href="products.html">Electronics</a></li>
-                        <li><a href="products.html">Home & Garden</a></li>
-                        <li><a href="products.html">Industrial</a></li>
-                    </ul>
-                </div>
-                
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <h6>Support</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="contact.html">Help Center</a></li>
-                        <li><a href="contact.html">Customer Service</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                    </ul>
+                <div class="col-lg-4">
+                    <h6 class="mb-3">Contact Us</h6>
+                    <p class="text-muted"><i class="fas fa-envelope me-2"></i>info@tradzy.com</p>
+                    <p class="text-muted"><i class="fas fa-phone me-2"></i>+1 234 567 8900</p>
                 </div>
             </div>
-            
-            <hr class="my-4">
-            
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <p class="mb-0">&copy; 2024 B2B MarketPlace. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="#" class="text-muted me-3"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="text-muted me-3"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-muted me-3"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#" class="text-muted"><i class="fab fa-instagram"></i></a>
-                </div>
+            <hr class="my-4 bg-secondary">
+            <div class="text-center text-muted">
+                <p class="mb-0">&copy; 2025 TRADZY. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- API Integration Script -->
+    <script src="/static/api.js"></script>
+    
+    <script>
+        // =================================================================
+        // DYNAMIC PRODUCT DATA LOADING
+        // This script fetches real product data from the backend API
+        // Data Flow: Database → Backend API (/api/products) → Frontend Display
+        // =================================================================
+
+        let allProducts = []; // Store all products from API
+        let displayedProducts = []; // Store filtered/sorted products
+
+        /**
+         * Fetch products from backend API when page loads
+         * API Endpoint: GET /api/products
+         * Returns: JSON array of product objects from database
+         */
+        async function loadProducts() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const productsContainer = document.getElementById('productsContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            try {
+                // Show loading indicator
+                loadingIndicator.classList.remove('d-none');
+                productsContainer.innerHTML = '';
+                errorMessage.classList.add('d-none');
+
+                console.log('📡 Fetching products from API: /api/products');
+
+                // Fetch products from backend API
+                const response = await fetch('/api/products', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Parse JSON response from backend
+                const products = await response.json();
+                
+                console.log(`✅ Loaded ${products.length} products from database`);
+
+                // Store products globally
+                allProducts = products;
+                displayedProducts = [...products];
+
+                // Hide loading indicator
+                loadingIndicator.classList.add('d-none');
+
+                // Render products on page
+                renderProducts(displayedProducts);
+
+            } catch (error) {
+                console.error('❌ Error loading products:', error);
+                
+                // Hide loading, show error
+                loadingIndicator.classList.add('d-none');
+                errorMessage.classList.remove('d-none');
+                errorText.textContent = 'Failed to load products. Please try again later.';
+            }
+        }
+
+        /**
+         * Render products to the DOM
+         * @param {Array} products - Array of product objects from API
+         */
+        function renderProducts(products) {
+            const productsContainer = document.getElementById('productsContainer');
+            const noProductsMessage = document.getElementById('noProductsMessage');
+
+            // Clear container
+            productsContainer.innerHTML = '';
+
+            // Show/hide no products message
+            if (products.length === 0) {
+                noProductsMessage.classList.remove('d-none');
+                return;
+            } else {
+                noProductsMessage.classList.add('d-none');
+            }
+
+            // Create product cards dynamically
+            products.forEach(product => {
+                const productCard = createProductCard(product);
+                productsContainer.appendChild(productCard);
+            });
+        }
+
+        /**
+         * Create a product card element
+         * @param {Object} product - Product data from database
+         * @returns {HTMLElement} Product card element
+         */
+        function createProductCard(product) {
+            const col = document.createElement('div');
+            col.className = 'col-lg-4 col-md-6 mb-4';
+
+            // Get category color and icon
+            const categoryInfo = getCategoryInfo(product.name);
+
+            col.innerHTML = `
+                <div class="product-card">
+                    <div style="height: 250px; background: ${categoryInfo.gradient}; display: flex; align-items: center; justify-content: center;">
+                        <div class="text-center">
+                            <i class="${categoryInfo.icon}" style="font-size: 3rem; color: ${categoryInfo.color}; margin-bottom: 1rem;"></i>
+                            <p style="color: ${categoryInfo.textColor}; margin: 0; font-weight: 600;">${categoryInfo.name}</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">${escapeHtml(product.name)}</h5>
+                            <span class="badge ${product.stock > 0 ? 'bg-success' : 'bg-danger'}">
+                                ${product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                            </span>
+                        </div>
+                        <p class="card-text">${escapeHtml(product.description)}</p>
+                        <div class="product-price">₹${parseFloat(product.price).toFixed(2)}</div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">Stock: ${product.stock} units</small>
+                            <div>
+                                <button class="btn btn-outline-primary btn-sm me-2" onclick="addToWishlist(${product.id})">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <button class="btn btn-custom-primary btn-sm" onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''}>
+                                    <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return col;
+        }
+
+        /**
+         * Get category styling based on product name/category
+         * @param {string} productName - Name of the product
+         * @returns {Object} Category styling information
+         */
+        function getCategoryInfo(productName) {
+            const name = productName.toLowerCase();
+            
+            if (name.includes('shirt') || name.includes('fashion') || name.includes('apparel')) {
+                return {
+                    name: 'Fashion',
+                    icon: 'fas fa-tshirt',
+                    color: '#D97706',
+                    textColor: '#92400E',
+                    gradient: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)'
+                };
+            } else if (name.includes('phone') || name.includes('electronic') || name.includes('speaker') || name.includes('lamp')) {
+                return {
+                    name: 'Electronics',
+                    icon: 'fas fa-mobile-alt',
+                    color: '#2563EB',
+                    textColor: '#1E40AF',
+                    gradient: 'linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%)'
+                };
+            } else if (name.includes('kitchen') || name.includes('home') || name.includes('bed')) {
+                return {
+                    name: 'Home & Kitchen',
+                    icon: 'fas fa-home',
+                    color: '#059669',
+                    textColor: '#065F46',
+                    gradient: 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)'
+                };
+            } else if (name.includes('safety') || name.includes('industrial')) {
+                return {
+                    name: 'Industrial',
+                    icon: 'fas fa-hard-hat',
+                    color: '#DC2626',
+                    textColor: '#991B1B',
+                    gradient: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)'
+                };
+            } else if (name.includes('yoga') || name.includes('fitness') || name.includes('sport')) {
+                return {
+                    name: 'Sports',
+                    icon: 'fas fa-dumbbell',
+                    color: '#7C3AED',
+                    textColor: '#5B21B6',
+                    gradient: 'linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%)'
+                };
+            } else if (name.includes('hair') || name.includes('beauty')) {
+                return {
+                    name: 'Beauty',
+                    icon: 'fas fa-spray-can',
+                    color: '#EC4899',
+                    textColor: '#BE185D',
+                    gradient: 'linear-gradient(135deg, #FCE7F3 0%, #FBCFE8 100%)'
+                };
+            }
+            
+            // Default category
+            return {
+                name: 'General',
+                icon: 'fas fa-box',
+                color: '#6B7280',
+                textColor: '#374151',
+                gradient: 'linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%)'
+            };
+        }
+
+        /**
+         * Escape HTML to prevent XSS attacks
+         * @param {string} text - Text to escape
+         * @returns {string} Escaped HTML
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+         * Search products by name or description
+         */
+        function searchProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            displayedProducts = allProducts.filter(product => {
+                return product.name.toLowerCase().includes(searchTerm) ||
+                       product.description.toLowerCase().includes(searchTerm);
+            });
+
+            renderProducts(displayedProducts);
+        }
+
+        /**
+         * Filter products by category
+         */
+        function filterProducts() {
+            const category = document.getElementById('categoryFilter').value.toLowerCase();
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            displayedProducts = allProducts.filter(product => {
+                const matchesCategory = !category || 
+                    product.name.toLowerCase().includes(category) ||
+                    product.description.toLowerCase().includes(category);
+                
+                const matchesSearch = !searchTerm ||
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.description.toLowerCase().includes(searchTerm);
+
+                return matchesCategory && matchesSearch;
+            });
+
+            renderProducts(displayedProducts);
+        }
+
+        /**
+         * Sort products by selected criteria
+         */
+        function sortProducts() {
+            const sortBy = document.getElementById('sortSelect').value;
+
+            switch (sortBy) {
+                case 'price-low':
+                    displayedProducts.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-high':
+                    displayedProducts.sort((a, b) => b.price - a.price);
+                    break;
+                case 'name':
+                    displayedProducts.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'stock':
+                    displayedProducts.sort((a, b) => b.stock - a.stock);
+                    break;
+                default:
+                    // Reset to original order
+                    displayedProducts = [...allProducts];
+            }
+
+            renderProducts(displayedProducts);
+        }
+
+        /**
+         * Add product to wishlist (placeholder function)
+         * @param {number} productId - ID of the product
+         */
+        function addToWishlist(productId) {
+            console.log(`💖 Added product ${productId} to wishlist`);
+            alert('Product added to wishlist! (Feature coming soon)');
+        }
+
+        /**
+         * Add product to cart (placeholder function)
+         * @param {number} productId - ID of the product
+         */
+        function addToCart(productId) {
+            console.log(`🛒 Added product ${productId} to cart`);
+            alert('Product added to cart! (Feature coming soon)');
+        }
+
+        // =================================================================
+        // INITIALIZATION
+        // Load products when page loads
+        // =================================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing products page...');
+            loadProducts();
+        });
+
+        // Add search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProducts();
+            }
+        });
+    </script>
+
+    <style>
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #007bff;
+            margin: 1rem 0;
+        }
+
+        .btn-custom-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        .btn-custom-primary:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .section-padding {
+            padding: 3rem 0;
+        }
+    </style>
 </body>
 </html>

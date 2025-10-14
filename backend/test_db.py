@@ -1,84 +1,123 @@
-import mysql.connector
-from mysql.connector import Error
-import os
-from dotenv import load_dotenv
-import secrets
+"""Database connectivity and schema checks using pytest and Flask test client."""
 
-def test_database_connection():
-    print("Testing database connection...")
+from __future__ import annotations
+
+import secrets
+import sqlite3
+from pathlib import Path
+from typing import Generator
+
+import pytest  # type: ignore
+
+from app import create_app
+from config import TestingConfig
+from db import get_db, init_db
+
+_REQUIRED_TABLES = {
+    "users",
+    "products",
+    "orders",
+    "order_items",
+    "carts",
+    "cart_items",
+    "wishlists",
+    "wishlist_items",
+    "contact_messages",
+}
+
+
+@pytest.fixture(scope="function")
+def app(tmp_path_factory) -> Generator:
+    """Provide a Flask application wired to an isolated SQLite database."""
+
+    database_path = tmp_path_factory.mktemp("data") / "tradzy_db.sqlite"
+
+    class ConfigUnderTest(TestingConfig):
+        DATABASE = str(database_path)
+
+    flask_app = create_app(ConfigUnderTest)
+
+    with flask_app.app_context():
+        init_db()
+
+    yield flask_app
+
+
+@pytest.fixture(scope="function")
+def db_connection(app):
+    """Return a raw sqlite3 connection for schema assertions."""
+
+    database_path = Path(app.config["DATABASE"])
+    connection = sqlite3.connect(database_path)
+    connection.row_factory = sqlite3.Row
     try:
-        # Create connection without database first
-        connection = mysql.connector.connect(
-            host="localhost",
-            user=input("Enter MySQL username: "),
-            password=input("Enter MySQL password: ")
+        yield connection
+    finally:
+        connection.close()
+
+
+def test_schema_contains_required_tables(db_connection):
+    """The schema initialisation should create all core tables."""
+
+    cursor = db_connection.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table'"
+    )
+    existing_tables = {row["name"] for row in cursor.fetchall()}
+    missing = _REQUIRED_TABLES.difference(existing_tables)
+
+    assert not missing, f"Expected tables missing from schema: {missing}"
+
+
+def test_user_and_product_insertion(app):
+    """Users and products can be inserted using the application database helper."""
+
+    with app.app_context():
+        db = get_db()
+
+        cursor = db.execute(
+            "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)",
+            ("admin_test", "hashed-password", "admin_test@tradzy.com", "admin"),
         )
-        
-        if connection.is_connected():
-            print("Successfully connected to MySQL server")
-            
-            # Create database and tables
-            cursor = connection.cursor()
-            
-            # Create database
-            cursor.execute("CREATE DATABASE IF NOT EXISTS tradzy")
-            print("Database 'tradzy' created successfully")
-            
-            # Switch to our database
-            cursor.execute("USE tradzy")
-            
-            # Create tables
-            tables = [
-                """
-                CREATE TABLE IF NOT EXISTS users (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    username VARCHAR(50) NOT NULL UNIQUE,
-                    password VARCHAR(255) NOT NULL,
-                    email VARCHAR(100) NOT NULL UNIQUE,
-                    role ENUM('admin', 'retailer', 'customer') NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-                """,
-                """
-                CREATE TABLE IF NOT EXISTS products (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(100) NOT NULL,
-                    description TEXT,
-                    price DECIMAL(10, 2) NOT NULL,
-                    stock INT NOT NULL DEFAULT 0,
-                    retailer_id INT,
-                    image_url VARCHAR(255),
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (retailer_id) REFERENCES users(id)
-                )
-                """
-            ]
-            
-            for table_query in tables:
-                cursor.execute(table_query)
-                print("Table created successfully")
-            
-            connection.commit()
-            
-            # Create .env file
-            env_content = f"""DB_HOST=localhost
-DB_USER={connection.user}
-DB_PASSWORD={connection.password}
-DB_NAME=tradzy
-SECRET_KEY={secrets.token_hex(24)}"""
-            
-            with open('.env', 'w') as f:
-                f.write(env_content)
-            print(".env file created successfully")
-            
-            cursor.close()
-            connection.close()
-            print("Database setup completed successfully!")
-            return True
-            
-    except Error as e:
-        print(f"Error: {e}")
-        return False
+        user_id = cursor.lastrowid
+        db.execute(
+            "INSERT INTO products (name, price, stock, retailer_id) VALUES (?, ?, ?, ?)",
+            ("Sample Product", 19.99, 5, user_id),
+        )
+        db.commit()
+
+        user = db.execute(
+            "SELECT username, role FROM users WHERE username = ?",
+            ("admin_test",),
+        ).fetchone()
+        product = db.execute(
+            "SELECT name, stock FROM products WHERE name = ?",
+            ("Sample Product",),
+        ).fetchone()
+
+        assert user is not None
+        assert user["role"] == "admin"
+        assert product is not None
+        assert product["stock"] == 5
+
+
+def test_env_file_generation(tmp_path):
+    """Generating an application .env file should include required secrets."""
+
+    env_path = tmp_path / ".env"
+    secret_key = secrets.token_hex(24)
+    contents = (
+        "DB_HOST=localhost\n"
+        "DB_USER=test_user\n"
+        "DB_PASSWORD=test_password\n"
+        "DB_NAME=tradzy\n"
+        f"SECRET_KEY={secret_key}\n"
+    )
+    env_path.write_text(contents, encoding="utf-8")
+
+    stored = env_path.read_text(encoding="utf-8")
+    assert f"SECRET_KEY={secret_key}" in stored
+    assert stored.count("\n") >= 4
+
 
 if __name__ == "__main__":
-    test_database_connection()
+    raise SystemExit(pytest.main([__file__]))
