@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import timedelta
 from typing import Any, Dict
 
 from dotenv import load_dotenv
@@ -18,7 +19,7 @@ from flask_jwt_extended import JWTManager
 from flask_talisman import Talisman
 
 from config import Config
-from db import close_db
+from db import close_db, check_and_create_tables
 
 load_dotenv()
 
@@ -41,7 +42,25 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     )
 
     app.config.from_object(config_class)
-    app.config.setdefault("SESSION_PERMANENT", False)
+    
+    # FIX 1: Ensure SECRET_KEY is set from environment or use a fixed fallback
+    # This is CRITICAL - without a consistent SECRET_KEY, sessions will be invalidated
+    if not app.config.get('SECRET_KEY'):
+        app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production-12345')
+    
+    # FIX 2: Session configuration for development - proper settings for localhost
+    # Use Flask's built-in session (client-side signed cookies) instead of filesystem
+    app.config['SESSION_COOKIE_HTTPONLY'] = True   # Security: prevent XSS attacks
+    app.config['SESSION_COOKIE_SECURE'] = False     # Allow HTTP for localhost
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'   # Allow same-site navigation
+    app.config['SESSION_COOKIE_NAME'] = 'tradzy_session'
+    app.config['SESSION_COOKIE_DOMAIN'] = None      # Use None for localhost compatibility
+    app.config['SESSION_COOKIE_PATH'] = '/'
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
+    # REMOVED: SESSION_TYPE = 'filesystem' - use Flask's default client-side sessions
+    
+    # Enable debug mode
+    app.config['DEBUG'] = True
 
     # Configure CORS for API routes only
     CORS(
@@ -80,6 +99,44 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     app.register_blueprint(wishlist_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(wholesaler_bp)
+
+    # Initialize database tables if they don't exist
+    with app.app_context():
+        try:
+            check_and_create_tables()
+        except Exception as e:
+            app.logger.error(f"Failed to initialize database: {e}")
+            # Continue anyway - let the first request handle it
+
+    @app.before_request
+    def ensure_database_exists():
+        """Ensure database tables exist before handling any request."""
+        # FIX 5: Enhanced debug logging for session troubleshooting
+        print(f"\n=== REQUEST: {request.method} {request.path} ===")
+        print(f"Session data: {dict(session)}")
+        print(f"Session modified: {session.modified}")
+        print(f"Cookies received: {dict(request.cookies)}")
+        print(f"====================================\n")
+        
+        # Only check once per application instance
+        if not hasattr(app, '_database_initialized'):
+            try:
+                check_and_create_tables()
+                app._database_initialized = True
+            except Exception as e:
+                app.logger.error(f"Database initialization error: {e}")
+                # Don't block requests, but log the error
+
+    # FIX 6: Add after_request handler to debug response cookies
+    @app.after_request
+    def debug_response_cookies(response):
+        """Debug response cookies being sent."""
+        print(f"\n=== RESPONSE for {request.path} ===")
+        print(f"Status: {response.status}")
+        print(f"Set-Cookie headers: {response.headers.getlist('Set-Cookie')}")
+        print(f"Session after request: {dict(session)}")
+        print(f"====================================\n")
+        return response
 
     @app.teardown_appcontext
     def teardown_db(exception: BaseException | None) -> None:  # pragma: no cover - teardown
@@ -125,37 +182,77 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         """Serve the wholesaler login page."""
         return render_template("wholesaler.html")
 
-    dashboard_templates = {
-        "admin": "admin.html",
-        "retailer": "retailer.html",
-        "wholesaler": "wholesaler.html",
-    }
+    @app.route("/wholesaler")
+    def serve_wholesaler_portal() -> str:
+        """Redirect to wholesaler login page."""
+        return redirect(url_for("serve_wholesaler_login"))
 
-    @app.route("/dashboard/<role>")
-    def serve_dashboard(role: str):
-        template = dashboard_templates.get(role)
-        if template is None:
-            return redirect(url_for("serve_login"))
-
-        if "user_id" not in session:
-            return redirect(url_for("serve_login"))
-
-        if session.get("role") != role:
-            return redirect(url_for("serve_login"))
-
-        return render_template(template)
-
+    # === AUTHENTICATION-PROTECTED DASHBOARD ROUTES ===
+    
     @app.route("/admin")
-    def admin_alias():
-        return redirect(url_for("serve_dashboard", role="admin"))
+    @app.route("/admin_dashboard.html")
+    def admin_dashboard():
+        """Serve the admin dashboard page.
+        
+        Only accessible to users with 'admin' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        print(f"\n=== ADMIN DASHBOARD ACCESS ATTEMPT ===")
+        print(f"Session data: {dict(session)}")
+        print(f"Session keys: {list(session.keys())}")
+        print(f"user_id in session: {'user_id' in session}")
+        print(f"role in session: {session.get('role')}")
+        print(f"Cookies: {dict(request.cookies)}")
+        print(f"======================================\n")
+        
+        if "user_id" not in session:
+            print("ADMIN DASHBOARD: No user_id, redirecting to login")
+            return redirect(url_for("serve_admin_login"))
+        
+        if session.get("role") != "admin":
+            print(f"ADMIN DASHBOARD: Wrong role '{session.get('role')}', redirecting to login")
+            return redirect(url_for("serve_admin_login"))
+        
+        print("ADMIN DASHBOARD: Access granted, rendering template")
+        return render_template("admin_dashboard.html")
 
     @app.route("/retailer")
-    def retailer_alias():
-        return redirect(url_for("serve_dashboard", role="retailer"))
+    def retailer_dashboard():
+        """Serve the retailer dashboard page.
+        
+        Only accessible to users with 'retailer' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        print(f"\n=== RETAILER DASHBOARD ACCESS ATTEMPT ===")
+        print(f"Session data: {dict(session)}")
+        print(f"======================================\n")
+        
+        if "user_id" not in session:
+            return redirect(url_for("serve_login"))
+        
+        if session.get("role") != "retailer":
+            return redirect(url_for("serve_login"))
+        
+        return render_template("retailer_dashboard.html")
 
-    @app.route("/wholesaler")
-    def wholesaler_alias():
-        return redirect(url_for("serve_dashboard", role="wholesaler"))
+    @app.route("/wholesaler/dashboard")
+    def wholesaler_dashboard():
+        """Serve the wholesaler dashboard page.
+        
+        Only accessible to users with 'wholesaler' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        print(f"\n=== WHOLESALER DASHBOARD ACCESS ATTEMPT ===")
+        print(f"Session data: {dict(session)}")
+        print(f"======================================\n")
+        
+        if "user_id" not in session:
+            return redirect(url_for("serve_login"))
+        
+        if session.get("role") != "wholesaler":
+            return redirect(url_for("serve_login"))
+        
+        return render_template("wholesaler_dashboard.html")
 
     @app.route("/health")
     def health_check() -> Dict[str, str]:

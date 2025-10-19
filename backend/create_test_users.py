@@ -30,6 +30,12 @@ test_users = [
         'role': 'retailer'
     },
     {
+        'username': 'wholesaler',
+        'email': 'wholesaler@tradzy.com',
+        'password': 'wholesaler123',  # Plain text password - will be hashed
+        'role': 'wholesaler'
+    },
+    {
         'username': 'deadpool',
         'email': 'deadpool.ops106@gmail.com',
         'password': 'deadpool123',  # Plain text password - will be hashed
@@ -78,4 +84,5 @@ print("✅ Test users creation complete!")
 print("\nYou can now login with these credentials:")
 print("1. Admin: admin@tradzy.com / admin123")
 print("2. Retailer: retailer@tradzy.com / retailer123")
-print("3. Admin (Deadpool): deadpool.ops106@gmail.com / deadpool123")
+print("3. Wholesaler: wholesaler@tradzy.com / wholesaler123")
+print("4. Admin (Deadpool): deadpool.ops106@gmail.com / deadpool123")

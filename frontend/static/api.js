@@ -1,5 +1,5 @@
-// API Base URL
-const BASE_URL = 'http://localhost:5000/api';
+// API Base URL - use relative path to work from any host
+const BASE_URL = '/api';  // Works with localhost, 127.0.0.1, or IP address
 
 /**
  * Login function - Sends credentials to backend and receives JWT token

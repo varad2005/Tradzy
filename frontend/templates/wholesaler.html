@@ -335,7 +335,7 @@
                 showAlert(`Access Denied: This portal is for ${requiredRole}s only. You are logged in as ${userRole}.`, 'error');
                 setTimeout(() => {
                     logout().then(() => {
-                        window.location.href = 'login.html';
+                        window.location.href = '/login';
                     });
                 }, 2000);
                 return false;
@@ -344,22 +344,12 @@
         }
 
         // Check if already logged in on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            if (isLoggedIn()) {
-                const userRole = localStorage.getItem('userRole');
-                const username = localStorage.getItem('username');
-                
-                if (userRole === 'wholesaler') {
-                    // Already authenticated as wholesaler - redirect to dashboard
-                    console.log(`Already logged in as ${username} (wholesaler)`);
-                    showAlert(`Welcome back, ${username}! Redirecting to dashboard...`, 'success');
-                    setTimeout(() => {
-                        window.location.href = '/wholesaler-dashboard.html';
-                    }, 1500);
-                } else if (userRole) {
-                    // Logged in but wrong role
-                    checkRoleAccess('wholesaler');
-                }
+        window.addEventListener('DOMContentLoaded', async function() {
+            // Clear any stale authentication data to prevent auto-redirects
+            // Users should manually login on the login page
+            if (localStorage.getItem('jwt_token')) {
+                console.log('Clearing existing auth data for fresh login');
+                localStorage.clear();
             }
         });
 
@@ -392,9 +382,12 @@
                 if (response.user.role === 'wholesaler') {
                     showAlert(`✅ Login successful! Welcome, ${response.user.username}!`, 'success');
                     
-                    // Redirect to homepage after brief delay
+                    // Use redirect URL from server response or default to wholesaler dashboard
+                    const redirectUrl = response.redirect || '/wholesaler/dashboard';
+                    
+                    // Redirect to appropriate page after brief delay
                     setTimeout(() => {
-                        window.location.href = '/';
+                        window.location.href = redirectUrl;
                     }, 1000);
                 } else {
                     // Wrong role - deny access

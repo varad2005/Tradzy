@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 from typing import Any, Callable, Iterable
 
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request, session, url_for
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -127,32 +127,45 @@ def login() -> tuple[Any, int]:
 
     access_token = create_access_token(identity=user["id"])
 
+    # FIX: Clear and set session with proper configuration
     session.clear()
+    session.permanent = True  # CRITICAL: Set this BEFORE setting session data
     session["user_id"] = user["id"]
     session["role"] = user["role"]
+    session.modified = True  # FIX: Explicitly mark session as modified
+    
+    # Enhanced debug logging
+    print(f"\n=== LOGIN SUCCESSFUL ===")
+    print(f"User ID: {user['id']}, Role: {user['role']}")
+    print(f"Session after setting: {dict(session)}")
+    print(f"Session permanent: {session.permanent}")
+    print(f"Session modified: {session.modified}")
+    print(f"========================\n")
 
+    # Role-based redirect mapping - use explicit dashboard URLs
     redirect_map = {
-        "admin": "/dashboard/admin",
-        "retailer": "/dashboard/retailer",
-        "wholesaler": "/dashboard/wholesaler",
+        "admin": "/admin_dashboard.html",
+        "retailer": "/retailer",
+        "wholesaler": "/wholesaler/dashboard",
     }
 
-    return (
-        jsonify(
-            {
-                "message": "Login successful",
-                "access_token": access_token,
-                "redirect": redirect_map.get(user["role"], "/"),
-                "user": {
-                    "id": user["id"],
-                    "username": user["username"],
-                    "email": user["email"],
-                    "role": user["role"],
-                },
-            }
-        ),
-        200,
-    )
+    response_data = {
+        "message": "Login successful",
+        "access_token": access_token,
+        "redirect": redirect_map.get(user["role"], "/"),
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+            "email": user["email"],
+            "role": user["role"],
+        },
+    }
+    
+    # FIX: Create explicit response to ensure session is saved
+    response = jsonify(response_data)
+    response.status_code = 200
+    
+    return response
 
 
 @auth_bp.route("/logout", methods=["POST"])

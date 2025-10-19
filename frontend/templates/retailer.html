@@ -89,8 +89,9 @@
                     if (response.user.role === 'retailer') {
                         // Show success message briefly
                         alert('✅ Login successful! Welcome, Retailer!');
-                        // Redirect to homepage
-                        window.location.href = '/';
+                        // Use redirect URL from server response or default to retailer dashboard
+                        const redirectUrl = response.redirect || '/dashboard/retailer';
+                        window.location.href = redirectUrl;
                     } else {
                         // User is not retailer
                         alert('❌ Access Denied: You need retailer privileges to access this portal.');

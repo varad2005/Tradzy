@@ -42,3 +42,35 @@ def init_db() -> None:
         db = get_db()
         db.executescript(schema_sql)
         db.commit()
+
+
+def check_and_create_tables() -> None:
+    """Check if required tables exist and create them if they don't."""
+    db = get_db()
+    cursor = db.cursor()
+    
+    try:
+        # Check if users table exists
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+        )
+        table_exists = cursor.fetchone()
+        
+        if not table_exists:
+            current_app.logger.info("Database tables not found. Initializing database...")
+            init_db()
+            current_app.logger.info("Database initialized successfully!")
+        else:
+            current_app.logger.info("Database tables already exist.")
+            
+    except sqlite3.Error as e:
+        current_app.logger.error(f"Database error during table check: {e}")
+        # Try to initialize anyway
+        try:
+            init_db()
+            current_app.logger.info("Database initialized after error.")
+        except Exception as init_error:
+            current_app.logger.error(f"Failed to initialize database: {init_error}")
+            raise
+    finally:
+        cursor.close()

@@ -159,3 +159,48 @@ def delete_product(product_id: int) -> tuple[Any, int]:
     db.commit()
 
     return jsonify({"message": "Product deleted successfully"}), 200
+
+
+# Additional routes for the wholesaler dashboard
+@products_bp.post("/add")
+@login_required
+@role_required(["admin", "retailer", "wholesaler"])
+def add_product() -> tuple[Any, int]:
+    """Add a new product (alias for POST /)"""
+    return create_product()
+
+
+@products_bp.get("/list")
+@login_required
+@role_required(["admin", "retailer", "wholesaler"])
+def list_user_products() -> tuple[Any, int]:
+    """Get products for the current user"""
+    db = get_db()
+    user_id = session["user_id"]
+    
+    products = db.execute(
+        """
+        SELECT p.id, p.name, p.description, p.price, p.stock, p.category, 
+               p.image_url, p.created_at, p.updated_at
+        FROM products p
+        WHERE p.retailer_id = ?
+        ORDER BY p.created_at DESC
+        """,
+        (user_id,),
+    ).fetchall()
+    
+    return jsonify([dict(product) for product in products]), 200
+
+
+@products_bp.put("/edit/<int:product_id>")
+@login_required
+def edit_product(product_id: int) -> tuple[Any, int]:
+    """Edit a product (alias for PUT /<product_id>)"""
+    return update_product(product_id)
+
+
+@products_bp.delete("/delete/<int:product_id>")
+@login_required  
+def remove_product(product_id: int) -> tuple[Any, int]:
+    """Delete a product (alias for DELETE /<product_id>)"""
+    return delete_product(product_id)

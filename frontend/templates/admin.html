@@ -84,14 +84,22 @@
                     const response = await login(email, password);
                     
                     // Login successful!
-                    console.log('Login successful:', response);
+                    console.log('✅ Login successful:', response);
                     
                     // Check if user is admin
                     if (response.user.role === 'admin') {
-                        // Show success message briefly
-                        alert('✅ Login successful! Welcome, Admin!');
-                        // Redirect to homepage
-                        window.location.href = '/';
+                        // Show visual success feedback
+                        button.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 8px;"></i>Success! Redirecting...';
+                        button.style.backgroundColor = '#27ae60';
+                        
+                        console.log('Redirecting to admin dashboard in 1 second...');
+                        
+                        // Give time for cookie to be set, then redirect
+                        setTimeout(() => {
+                            console.log('Redirecting NOW to:', '/admin_dashboard.html');
+                            window.location.href = '/admin_dashboard.html';
+                        }, 1000);
+                        return; // Exit early to prevent finally block from running
                     } else {
                         // User is not admin
                         alert('❌ Access Denied: You need admin privileges to access this portal.');
@@ -104,9 +112,11 @@
                     console.error('Login failed:', error);
                     alert('❌ Login Failed:\n' + error.message + '\n\nPlease check your credentials and try again.');
                 } finally {
-                    // Reset button state
-                    button.innerHTML = originalText;
-                    button.disabled = false;
+                    // Reset button state (only if not redirecting)
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 100);
                 }
             }
         });
@@ -135,10 +145,11 @@
                 const username = localStorage.getItem('username');
                 console.log(`Already logged in as ${username} (${userRole})`);
                 
-                // You could auto-redirect or show a message here
+                // Don't auto-redirect - let user click login again if needed
+                // This prevents infinite redirect loops
                 if (userRole === 'admin') {
-                    // User is already logged in as admin
                     console.log('User is already authenticated as admin');
+                    console.log('Please click login to continue to dashboard');
                 }
             }
         });
