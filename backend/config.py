@@ -16,13 +16,15 @@ FRONTEND_DIR = BASE_DIR.parent / "frontend"
 class Config:
     """Centralised Flask configuration for all environments."""
 
-    SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
-    SESSION_TYPE = os.getenv("SESSION_TYPE", "filesystem")
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production-12345")
+    # Use Flask's default client-side sessions (not filesystem)
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = _to_bool(os.getenv("SESSION_COOKIE_SECURE"), False)
-    SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_DOMAIN = None
+    SESSION_COOKIE_PATH = "/"
     PERMANENT_SESSION_LIFETIME = timedelta(
-        seconds=int(os.getenv("SESSION_LIFETIME_SECONDS", "3600"))
+        seconds=int(os.getenv("SESSION_LIFETIME_SECONDS", "86400"))
     )
 
     DATABASE = os.getenv("DATABASE_URL", str(BASE_DIR / "tradzy.db"))
