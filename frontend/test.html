@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Validation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #ccc;
+            padding-left: 15px;
+        }
+        .success {
+            border-left-color: #4CAF50;
+            background: #f1f8f4;
+        }
+        .error {
+            border-left-color: #f44336;
+            background: #fef1f0;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0b7dda;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Tradzy Site Validation</h1>
+    
+    <div class="test-section">
+        <h2>Site Structure Test</h2>
+        <p>Click the button below to test if all pages and resources exist.</p>
+        <button onclick="runTests()">Run Tests</button>
+        <button onclick="location.reload()">Reset</button>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Quick Links</h2>
+        <p>Test navigation to all pages:</p>
+        <button onclick="window.open('index.html', '_blank')">Home</button>
+        <button onclick="window.open('products.html', '_blank')">Products</button>
+        <button onclick="window.open('login.html', '_blank')">Login</button>
+        <button onclick="window.open('contact.html', '_blank')">Contact</button>
+        <button onclick="window.open('admin.html', '_blank')">Admin</button>
+        <button onclick="window.open('retailer.html', '_blank')">Retailer</button>
+        <button onclick="window.open('wholesaler.html', '_blank')">Wholesaler</button>
+    </div>
+
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Running tests...</p>';
+            
+            const tests = [
+                { name: 'Home Page', url: 'index.html' },
+                { name: 'Products Page', url: 'products.html' },
+                { name: 'Login Page', url: 'login.html' },
+                { name: 'Contact Page', url: 'contact.html' },
+                { name: 'Admin Page', url: 'admin.html' },
+                { name: 'Admin Dashboard', url: 'admin_dashboard.html' },
+                { name: 'Retailer Page', url: 'retailer.html' },
+                { name: 'Retailer Dashboard', url: 'retailer_dashboard.html' },
+                { name: 'Retailer Cart', url: 'retailer_cart.html' },
+                { name: 'Retailer Orders', url: 'retailer_orders.html' },
+                { name: 'Retailer Wishlist', url: 'retailer_wishlist.html' },
+                { name: 'Wholesaler Page', url: 'wholesaler.html' },
+                { name: 'Wholesaler Dashboard', url: 'wholesaler_dashboard.html' },
+                { name: '404 Page', url: '404.html' },
+                { name: '403 Page', url: '403.html' },
+                { name: '500 Page', url: '500.html' },
+                { name: 'Main CSS', url: 'static/style.css' },
+                { name: 'Admin CSS', url: 'static/admin.css' },
+                { name: 'Retailer CSS', url: 'static/retailer.css' },
+                { name: 'API JS', url: 'static/api.js' }
+            ];
+
+            let html = '<h3>Test Results:</h3>';
+            let passCount = 0;
+            let failCount = 0;
+
+            for (const test of tests) {
+                try {
+                    const response = await fetch(test.url, { method: 'HEAD' });
+                    if (response.ok) {
+                        html += `<div class="test-item success">✅ ${test.name} - OK</div>`;
+                        passCount++;
+                    } else {
+                        html += `<div class="test-item error">❌ ${test.name} - Error (${response.status})</div>`;
+                        failCount++;
+                    }
+                } catch (error) {
+                    html += `<div class="test-item error">❌ ${test.name} - Failed to load</div>`;
+                    failCount++;
+                }
+            }
+
+            html += `<div style="margin-top: 20px; padding: 15px; background: ${failCount === 0 ? '#d4edda' : '#fff3cd'}; border-radius: 4px;">
+                        <strong>Summary:</strong> ${passCount} passed, ${failCount} failed
+                     </div>`;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // Run tests automatically on page load
+        window.addEventListener('load', () => {
+            console.log('Page loaded. Ready to test.');
+        });
+    </script>
+</body>
+</html>

@@ -51,8 +51,9 @@ class Config:
     FRONTEND_STATIC_FOLDER = os.getenv(
         "FRONTEND_STATIC_FOLDER", str(FRONTEND_DIR / "static")
     )
+    # Updated: HTML files are now in the root of frontend folder for Netlify
     FRONTEND_TEMPLATE_FOLDER = os.getenv(
-        "FRONTEND_TEMPLATE_FOLDER", str(FRONTEND_DIR / "templates")
+        "FRONTEND_TEMPLATE_FOLDER", str(FRONTEND_DIR)
     )
 
     TEMPLATES_AUTO_RELOAD = _to_bool(os.getenv("TEMPLATES_AUTO_RELOAD"), False)

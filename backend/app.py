@@ -150,19 +150,23 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         }
 
     @app.route("/")
+    @app.route("/index.html")
     def serve_index() -> str:
         return render_template("index.html")
 
     @app.route("/login")
+    @app.route("/login.html")
     def serve_login() -> str:
         return render_template("login.html")
 
     @app.route("/contact")
+    @app.route("/contact.html")
     def serve_contact() -> str:
         """Serve the contact page."""
         return render_template("contact.html")
 
     @app.route("/products")
+    @app.route("/products.html")
     def serve_products() -> str:
         """Serve the products page."""
         return render_template("products.html")
@@ -218,6 +222,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
 
     @app.route("/retailer")
     @app.route("/retailer-dashboard")
+    @app.route("/retailer_dashboard.html")
     def retailer_dashboard():
         """Serve the retailer dashboard page.
         
@@ -237,6 +242,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         return render_template("retailer_dashboard.html")
 
     @app.route("/retailer/cart")
+    @app.route("/retailer_cart.html")
     def retailer_cart():
         """Serve the retailer cart page.
         
@@ -252,6 +258,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         return render_template("retailer_cart.html")
 
     @app.route("/retailer/orders")
+    @app.route("/retailer_orders.html")
     def retailer_orders():
         """Serve the retailer orders page.
         
@@ -267,6 +274,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         return render_template("retailer_orders.html")
 
     @app.route("/retailer/wishlist")
+    @app.route("/retailer_wishlist.html")
     def retailer_wishlist():
         """Serve the retailer wishlist page.
         
@@ -282,6 +290,8 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         return render_template("retailer_wishlist.html")
 
     @app.route("/wholesaler/dashboard")
+    @app.route("/wholesaler-dashboard")
+    @app.route("/wholesaler_dashboard.html")
     def wholesaler_dashboard():
         """Serve the wholesaler dashboard page.
         
