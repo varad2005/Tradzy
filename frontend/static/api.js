@@ -20,13 +20,23 @@
  */
 
 // API Base URL - Update this to your backend URL when deploying
-const BASE_URL = '/api';  // Default: Works with Flask backend on same domain
-
-// For production with separate backend, use:
-// const BASE_URL = 'https://your-backend-api.com/api';
-
-// For Netlify Functions, use:
+// IMPORTANT: Change this when deploying to Netlify!
+// 
+// For LOCAL development (Flask backend on same machine):
+// const BASE_URL = '/api';
+//
+// For PRODUCTION (deployed backend - REQUIRED for Netlify):
+const BASE_URL = 'https://your-backend-api.onrender.com/api';  // ⚠️ UPDATE THIS!
+//
+// For Netlify Functions (serverless):
 // const BASE_URL = '/.netlify/functions';
+//
+// DEPLOYMENT GUIDE:
+// 1. Deploy your Flask backend to Render, Railway, or PythonAnywhere
+// 2. Get your backend URL (e.g., https://tradzy-api.onrender.com)
+// 3. Update the BASE_URL above to: 'https://tradzy-api.onrender.com/api'
+// 4. Update CORS_WHITELIST in backend/config.py to include your Netlify URL
+// 5. Commit and push to trigger Netlify rebuild
 
 /**
  * Login function - Sends credentials to backend and receives JWT token
@@ -36,6 +46,11 @@ const BASE_URL = '/api';  // Default: Works with Flask backend on same domain
  */
 async function login(email, password) {
     try {
+        // Check if BASE_URL is configured
+        if (BASE_URL.includes('your-backend-api')) {
+            throw new Error('⚠️ Backend URL not configured! Please deploy your Flask backend and update BASE_URL in api.js');
+        }
+        
         // Send POST request to login endpoint
         const response = await fetch(`${BASE_URL}/auth/login`, {
             method: 'POST',
@@ -45,6 +60,12 @@ async function login(email, password) {
             credentials: 'include', // Include cookies for session support
             body: JSON.stringify({ email, password }) // Send email and password as JSON
         });
+        
+        // Check if response is actually JSON (not HTML error page)
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Backend API is not responding. Please check if backend is deployed and BASE_URL is correct in api.js');
+        }
         
         // Parse the JSON response from server
         const data = await response.json();
