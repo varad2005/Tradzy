@@ -1,9 +1,10 @@
 [build]
-  publish = "frontend/templates"
-  command = "echo 'No build command needed for static site'"
+base = "frontend"
+publish = "templates"
+command = "echo 'No build command needed for static site'"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+from = "/*"
+to = "/index.html"
+status = 200
 
