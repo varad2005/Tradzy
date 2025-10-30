@@ -1,5 +1,32 @@
-// API Base URL - use relative path to work from any host
-const BASE_URL = '/api';  // Works with localhost, 127.0.0.1, or IP address
+/**
+ * Tradzy API Client
+ * 
+ * IMPORTANT: This file contains API calls to the backend.
+ * For Netlify static hosting, you have two options:
+ * 
+ * Option 1: Connect to a separate backend API
+ * - Deploy your backend separately (Heroku, Railway, Render, etc.)
+ * - Update BASE_URL below to point to your backend URL
+ * - Example: const BASE_URL = 'https://your-backend-api.herokuapp.com/api';
+ * 
+ * Option 2: Use Netlify Functions (Serverless)
+ * - Create Netlify Functions to handle API calls
+ * - Update BASE_URL to: const BASE_URL = '/.netlify/functions';
+ * - Convert your Flask routes to Netlify Functions
+ * 
+ * Option 3: Mock Data (For demo purposes)
+ * - Comment out real API calls
+ * - Return mock data for testing the frontend
+ */
+
+// API Base URL - Update this to your backend URL when deploying
+const BASE_URL = '/api';  // Default: Works with Flask backend on same domain
+
+// For production with separate backend, use:
+// const BASE_URL = 'https://your-backend-api.com/api';
+
+// For Netlify Functions, use:
+// const BASE_URL = '/.netlify/functions';
 
 /**
  * Login function - Sends credentials to backend and receives JWT token
