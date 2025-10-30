@@ -1,11 +1,12 @@
 [build]
   base = "frontend"
-  publish = "frontend"
+  publish = "."
   command = "echo 'No build command needed for static site'"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
 
 
