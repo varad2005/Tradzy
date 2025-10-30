@@ -217,6 +217,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         return render_template("admin_dashboard.html")
 
     @app.route("/retailer")
+    @app.route("/retailer-dashboard")
     def retailer_dashboard():
         """Serve the retailer dashboard page.
         
@@ -234,6 +235,51 @@ def create_app(config_class: type[Config] = Config) -> Flask:
             return redirect(url_for("serve_login"))
         
         return render_template("retailer_dashboard.html")
+
+    @app.route("/retailer/cart")
+    def retailer_cart():
+        """Serve the retailer cart page.
+        
+        Only accessible to users with 'retailer' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        if "user_id" not in session:
+            return redirect(url_for("serve_login"))
+        
+        if session.get("role") != "retailer":
+            return redirect(url_for("serve_login"))
+        
+        return render_template("retailer_cart.html")
+
+    @app.route("/retailer/orders")
+    def retailer_orders():
+        """Serve the retailer orders page.
+        
+        Only accessible to users with 'retailer' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        if "user_id" not in session:
+            return redirect(url_for("serve_login"))
+        
+        if session.get("role") != "retailer":
+            return redirect(url_for("serve_login"))
+        
+        return render_template("retailer_orders.html")
+
+    @app.route("/retailer/wishlist")
+    def retailer_wishlist():
+        """Serve the retailer wishlist page.
+        
+        Only accessible to users with 'retailer' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        if "user_id" not in session:
+            return redirect(url_for("serve_login"))
+        
+        if session.get("role") != "retailer":
+            return redirect(url_for("serve_login"))
+        
+        return render_template("retailer_wishlist.html")
 
     @app.route("/wholesaler/dashboard")
     def wholesaler_dashboard():
@@ -325,7 +371,8 @@ app = create_app()
 
 if __name__ == "__main__":
     app.run(
-        host=os.getenv("HOST", "0.0.0.0"),
+        # Bind to the IPv4 loopback by default to avoid IPv6/localhost resolution issues on Windows
+        host=os.getenv("HOST", "127.0.0.1"),
         port=int(os.getenv("PORT", "5000")),
         debug=app.config.get("DEBUG", False),
     )

@@ -29,7 +29,7 @@ CREATE TABLE products (
     description TEXT,
     price REAL NOT NULL,
     stock INTEGER NOT NULL DEFAULT 0,
-    retailer_id INTEGER NOT NULL,
+    retailer_id INTEGER NOT NULL,  -- User ID of the product owner (can be wholesaler, retailer, or admin)
     category TEXT,
     image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
