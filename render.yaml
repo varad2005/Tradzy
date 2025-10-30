@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: tradzy-backend
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --chdir backend app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_WHITELIST
+        value: https://tradzy-varad2005.netlify.app,http://localhost:5000
+      - key: DATABASE_URL
+        value: /opt/render/project/src/backend/tradzy.db
+    autoDeploy: true
