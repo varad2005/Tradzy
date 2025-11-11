@@ -7,429 +7,936 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
+            --primary-color: #3b82f6;
+            --primary-dark: #2563eb;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --bg-light: #f8fafc;
+            --border-color: #e2e8f0;
+            --sidebar-width: 260px;
+            --topbar-height: 70px;
         }
 
         body {
-            background-color: #ecf0f1;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-primary);
         }
 
-        .navbar {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .dashboard-header {
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
             background: white;
-            padding: 2rem 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-brand i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .sidebar-brand h4 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background-color: var(--bg-light);
+            color: var(--primary-color);
+        }
+
+        .menu-item.active {
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 0.875rem;
+        }
+
+        /* Top Bar */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--topbar-height);
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 999;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--bg-light);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            width: 400px;
+        }
+
+        .search-box input {
+            border: none;
+            background: none;
+            outline: none;
+            margin-left: 0.5rem;
+            width: 100%;
+            color: var(--text-primary);
+        }
+
+        .search-box i {
+            color: var(--text-secondary);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--bg-light);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--border-color);
+        }
+
+        .icon-btn .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 10px;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: var(--bg-light);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .profile-btn:hover {
+            background: var(--border-color);
+        }
+
+        .profile-btn img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--topbar-height);
+            padding: 2rem;
+            min-height: calc(100vh - var(--topbar-height));
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .stat-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+            border: 1px solid var(--border-color);
+            transition: box-shadow 0.2s;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card h3 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .stat-card p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin: 0;
         }
 
         .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            color: white;
+            font-size: 1.25rem;
         }
 
-        .table-card {
+        .stat-icon.blue { background: #dbeafe; color: #3b82f6; }
+        .stat-icon.green { background: #dcfce7; color: #22c55e; }
+        .stat-icon.purple { background: #f3e8ff; color: #a855f7; }
+        .stat-icon.orange { background: #ffedd5; color: #f97316; }
+
+        /* Content Card */
+        .content-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
             padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Table Styles */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .custom-table thead {
+            background: var(--bg-light);
+        }
+
+        .custom-table th {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .custom-table td {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: var(--bg-light);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active { background: #dcfce7; color: #16a34a; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .status-badge.completed { background: #dbeafe; color: #0284c7; }
+        .status-badge.suspended { background: #fee2e2; color: #dc2626; }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         .btn-action {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-            margin: 0 0.25rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 0.5rem;
         }
 
-        .status-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
+        .btn-action:hover {
+            background: var(--bg-light);
+        }
+
+        .btn-action.danger {
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+
+        .btn-action.danger:hover {
+            background: #fef2f2;
+        }
+
+        /* Activity List */
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content p {
+            margin: 0 0 0.25rem 0;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .activity-content small {
+            color: var(--text-secondary);
+            font-size: 0.8125rem;
+        }
+
+        /* Page Hidden */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .topbar {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .search-box {
+                width: 200px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-store me-2"></i>TRADZY Admin
-            </a>
-            <div class="navbar-nav ms-auto">
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-1"></i>Admin
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h1 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h1>
-                    <p class="text-muted mb-0">Manage your platform and monitor activity</p>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-store"></i>
+            <h4>TRADZY</h4>
+        </div>
+        <nav class="sidebar-menu">
+            <a class="menu-item active" data-page="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a class="menu-item" data-page="wholesalers">
+                <i class="fas fa-warehouse"></i>
+                <span>Wholesalers</span>
+            </a>
+            <a class="menu-item" data-page="retailers">
+                <i class="fas fa-store-alt"></i>
+                <span>Retailers</span>
+            </a>
+            <a class="menu-item" data-page="orders">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Orders</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search...">
+        </div>
+        <div class="topbar-actions">
+            <button class="icon-btn">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </button>
+            <button class="profile-btn" onclick="logout()">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                    A
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <button class="btn btn-primary me-2">
-                        <i class="fas fa-plus me-1"></i>Add User
-                    </button>
-                    <button class="btn btn-outline-secondary">
-                        <i class="fas fa-download me-1"></i>Export Data
-                    </button>
-                </div>
-            </div>
+                <span>Admin</span>
+            </button>
         </div>
     </div>
 
     <!-- Main Content -->
-    <div class="container">
-        <!-- Statistics Cards -->
-        <div class="row">
-            <div class="col-xl-3 col-md-6">
+    <div class="main-content">
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <h2 style="margin-bottom: 1.5rem; font-weight: 700;">Dashboard Overview</h2>
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background-color: var(--primary-color);">
-                            <i class="fas fa-users"></i>
+                    <div class="stat-card-header">
+                        <div>
+                            <h3 id="totalWholesalers">0</h3>
+                            <p>Total Wholesalers</p>
                         </div>
-                        <div class="ms-3">
-                            <h3 class="mb-0" id="totalUsers">Loading...</h3>
-                            <p class="text-muted mb-0">Total Users</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background-color: var(--success-color);">
-                            <i class="fas fa-box"></i>
-                        </div>
-                        <div class="ms-3">
-                            <h3 class="mb-0" id="totalProducts">Loading...</h3>
-                            <p class="text-muted mb-0">Total Products</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background-color: var(--warning-color);">
-                            <i class="fas fa-store"></i>
-                        </div>
-                        <div class="ms-3">
-                            <h3 class="mb-0" id="totalRetailers">Loading...</h3>
-                            <p class="text-muted mb-0">Retailers</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="stat-icon" style="background-color: var(--secondary-color);">
+                        <div class="stat-icon blue">
                             <i class="fas fa-warehouse"></i>
                         </div>
-                        <div class="ms-3">
-                            <h3 class="mb-0" id="totalWholesalers">Loading...</h3>
-                            <p class="text-muted mb-0">Wholesalers</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <h3 id="totalRetailers">0</h3>
+                            <p>Total Retailers</p>
+                        </div>
+                        <div class="stat-icon green">
+                            <i class="fas fa-store-alt"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <h3 id="totalOrders">0</h3>
+                            <p>Total Orders</p>
+                        </div>
+                        <div class="stat-icon purple">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div>
+                            <h3 id="totalRevenue">₹0</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                        <div class="stat-icon orange">
+                            <i class="fas fa-rupee-sign"></i>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Users Management -->
-        <div class="table-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4><i class="fas fa-users me-2"></i>User Management</h4>
-                <div>
-                    <button class="btn btn-sm btn-outline-primary me-2">
-                        <i class="fas fa-filter me-1"></i>Filter
-                    </button>
-                    <button class="btn btn-sm btn-success" onclick="addUser()">
-                        <i class="fas fa-plus me-1"></i>Add User
-                    </button>
+            <!-- Recent Activity -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h5>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="activity-list" id="activityList">
+                        <li class="activity-item">
+                            <div class="activity-icon blue">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>New wholesaler registered</p>
+                                <small>2 hours ago</small>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon green">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>New order placed - Order #1234</p>
+                                <small>5 hours ago</small>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon purple">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>New retailer signed up</p>
+                                <small>1 day ago</small>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Joined</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                        <!-- Users will be loaded here -->
-                        <tr>
-                            <td colspan="7" class="text-center">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        </div>
+
+        <!-- Wholesalers Page -->
+        <div id="wholesalers" class="page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; font-weight: 700;">Wholesalers</h2>
+            </div>
+            
+            <div class="content-card">
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Company</th>
+                                <th>Products</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wholesalersTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                    Loading wholesalers...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Products Management -->
-        <div class="table-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4><i class="fas fa-box me-2"></i>Product Management</h4>
-                <div>
-                    <button class="btn btn-sm btn-outline-primary me-2">
-                        <i class="fas fa-filter me-1"></i>Filter
-                    </button>
-                    <button class="btn btn-sm btn-warning">
-                        <i class="fas fa-eye me-1"></i>Review Flagged
-                    </button>
+        <!-- Retailers Page -->
+        <div id="retailers" class="page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; font-weight: 700;">Retailers</h2>
+            </div>
+            
+            <div class="content-card">
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Orders</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="retailersTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                    Loading retailers...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Product Name</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Seller</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productsTableBody">
-                        <!-- Products will be loaded here -->
-                        <tr>
-                            <td colspan="8" class="text-center">
-                                <div class="spinner-border" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        </div>
+
+        <!-- Orders Page -->
+        <div id="orders" class="page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0; font-weight: 700;">Orders</h2>
+            </div>
+            
+            <div class="content-card">
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Wholesaler</th>
+                                <th>Retailer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                    Loading orders...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/api.js"></script>
-    
+
     <script>
-        // Admin Dashboard JavaScript
+        // Page Navigation
         document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardData();
+            // Menu navigation
+            const menuItems = document.querySelectorAll('.menu-item');
+            const pages = document.querySelectorAll('.page');
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const targetPage = this.getAttribute('data-page');
+                    
+                    // Update active menu item
+                    menuItems.forEach(mi => mi.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show target page
+                    pages.forEach(page => page.classList.remove('active'));
+                    document.getElementById(targetPage).classList.add('active');
+                    
+                    // Load data for the page
+                    loadPageData(targetPage);
+                });
+            });
+
+            // Load initial dashboard data
+            loadDashboardStats();
+            loadWholesalers();
+            loadRetailers();
+            loadOrders();
         });
 
-        async function loadDashboardData() {
+        function loadPageData(page) {
+            switch(page) {
+                case 'wholesalers':
+                    loadWholesalers();
+                    break;
+                case 'retailers':
+                    loadRetailers();
+                    break;
+                case 'orders':
+                    loadOrders();
+                    break;
+            }
+        }
+
+        // Load Dashboard Statistics
+        async function loadDashboardStats() {
             try {
-                // Load statistics
-                await loadStatistics();
-                
-                // Load users table
-                await loadUsers();
-                
-                // Load products table
-                await loadProducts();
-                
+                const response = await fetch('/api/admin/stats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('totalWholesalers').textContent = stats.wholesalers || 0;
+                    document.getElementById('totalRetailers').textContent = stats.retailers || 0;
+                    document.getElementById('totalOrders').textContent = stats.orders || 0;
+                    document.getElementById('totalRevenue').textContent = '₹' + (stats.revenue || 0).toLocaleString();
+                } else {
+                    // Fallback to default values
+                    document.getElementById('totalWholesalers').textContent = '0';
+                    document.getElementById('totalRetailers').textContent = '0';
+                    document.getElementById('totalOrders').textContent = '0';
+                    document.getElementById('totalRevenue').textContent = '₹0';
+                }
             } catch (error) {
-                console.error('Error loading dashboard data:', error);
-                showAlert('Error loading dashboard data', 'error');
+                console.error('Error loading stats:', error);
+                document.getElementById('totalWholesalers').textContent = '0';
+                document.getElementById('totalRetailers').textContent = '0';
+                document.getElementById('totalOrders').textContent = '0';
+                document.getElementById('totalRevenue').textContent = '₹0';
             }
         }
 
-        async function loadStatistics() {
+        // Load Wholesalers
+        async function loadWholesalers() {
+            const tbody = document.getElementById('wholesalersTable');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+            
             try {
-                // You can implement API calls to get actual statistics
-                // For now, using placeholder data
-                document.getElementById('totalUsers').textContent = '156';
-                document.getElementById('totalProducts').textContent = '2,847';
-                document.getElementById('totalRetailers').textContent = '89';
-                document.getElementById('totalWholesalers').textContent = '67';
+                const response = await fetch('/api/admin/wholesalers');
+                if (response.ok) {
+                    const wholesalers = await response.json();
+                    renderWholesalers(wholesalers);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No wholesalers found</td></tr>';
+                }
             } catch (error) {
-                console.error('Error loading statistics:', error);
+                console.error('Error loading wholesalers:', error);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #dc2626;">Error loading wholesalers</td></tr>';
             }
         }
 
-        async function loadUsers() {
+        function renderWholesalers(wholesalers) {
+            const tbody = document.getElementById('wholesalersTable');
+            
+            if (!wholesalers || wholesalers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No wholesalers found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = wholesalers.map(w => `
+                <tr>
+                    <td><strong>${w.username || 'N/A'}</strong></td>
+                    <td>${w.company || 'N/A'}</td>
+                    <td>${w.products_count || 0}</td>
+                    <td><span class="status-badge ${w.is_active ? 'active' : 'suspended'}">${w.is_active ? 'Active' : 'Suspended'}</span></td>
+                    <td>
+                        <button class="btn-action" onclick="viewUser(${w.id}, 'wholesaler')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn-action danger" onclick="suspendUser(${w.id}, 'wholesaler')">
+                            <i class="fas fa-ban"></i> ${w.is_active ? 'Suspend' : 'Activate'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load Retailers
+        async function loadRetailers() {
+            const tbody = document.getElementById('retailersTable');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+            
             try {
-                // Placeholder user data - replace with actual API call
-                const users = [
-                    { id: 1, username: 'admin_master', email: 'admin@tradzy.com', role: 'admin', status: 'active', joined: '2024-01-15' },
-                    { id: 2, username: 'retail_nova', email: 'retail_nova@tradzy.com', role: 'retailer', status: 'active', joined: '2024-02-20' },
-                    { id: 3, username: 'wholesale_atlas', email: 'wholesale_atlas@tradzy.com', role: 'wholesaler', status: 'active', joined: '2024-03-10' }
-                ];
-
-                const tbody = document.getElementById('usersTableBody');
-                tbody.innerHTML = '';
-
-                users.forEach(user => {
-                    const row = `
-                        <tr>
-                            <td>${user.id}</td>
-                            <td>${user.username}</td>
-                            <td>${user.email}</td>
-                            <td><span class="badge bg-${getRoleBadgeColor(user.role)}">${user.role}</span></td>
-                            <td><span class="badge bg-${user.status === 'active' ? 'success' : 'danger'} status-badge">${user.status}</span></td>
-                            <td>${user.joined}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action" onclick="editUser(${user.id})">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteUser(${user.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
-                });
+                const response = await fetch('/api/admin/retailers');
+                if (response.ok) {
+                    const retailers = await response.json();
+                    renderRetailers(retailers);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No retailers found</td></tr>';
+                }
             } catch (error) {
-                console.error('Error loading users:', error);
-                document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading users</td></tr>';
+                console.error('Error loading retailers:', error);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #dc2626;">Error loading retailers</td></tr>';
             }
         }
 
-        async function loadProducts() {
+        function renderRetailers(retailers) {
+            const tbody = document.getElementById('retailersTable');
+            
+            if (!retailers || retailers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No retailers found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = retailers.map(r => `
+                <tr>
+                    <td><strong>${r.username || 'N/A'}</strong></td>
+                    <td>${r.email || 'N/A'}</td>
+                    <td>${r.orders_count || 0}</td>
+                    <td><span class="status-badge ${r.is_active ? 'active' : 'suspended'}">${r.is_active ? 'Active' : 'Suspended'}</span></td>
+                    <td>
+                        <button class="btn-action" onclick="viewUser(${r.id}, 'retailer')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn-action danger" onclick="deleteUser(${r.id}, 'retailer')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Load Orders
+        async function loadOrders() {
+            const tbody = document.getElementById('ordersTable');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+            
             try {
-                // Placeholder product data - replace with actual API call
-                const products = [
-                    { id: 1, name: 'Premium Coffee Beans', category: 'Food & Beverage', price: 24.99, stock: 150, seller: 'wholesale_atlas', status: 'active' },
-                    { id: 2, name: 'Wireless Headphones', category: 'Electronics', price: 89.99, stock: 75, seller: 'wholesale_tech', status: 'active' },
-                    { id: 3, name: 'Organic Cotton T-Shirt', category: 'Clothing', price: 19.99, stock: 200, seller: 'wholesale_fashion', status: 'pending' }
-                ];
-
-                const tbody = document.getElementById('productsTableBody');
-                tbody.innerHTML = '';
-
-                products.forEach(product => {
-                    const row = `
-                        <tr>
-                            <td>${product.id}</td>
-                            <td>${product.name}</td>
-                            <td>${product.category}</td>
-                            <td>$${product.price}</td>
-                            <td>${product.stock}</td>
-                            <td>${product.seller}</td>
-                            <td><span class="badge bg-${product.status === 'active' ? 'success' : 'warning'} status-badge">${product.status}</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action" onclick="viewProduct(${product.id})">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteProduct(${product.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
-                });
+                const response = await fetch('/api/admin/orders');
+                if (response.ok) {
+                    const orders = await response.json();
+                    renderOrders(orders);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No orders found</td></tr>';
+                }
             } catch (error) {
-                console.error('Error loading products:', error);
-                document.getElementById('productsTableBody').innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading products</td></tr>';
+                console.error('Error loading orders:', error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #dc2626;">Error loading orders</td></tr>';
             }
         }
 
-        function getRoleBadgeColor(role) {
-            switch(role) {
-                case 'admin': return 'danger';
-                case 'wholesaler': return 'primary';
-                case 'retailer': return 'success';
-                default: return 'secondary';
+        function renderOrders(orders) {
+            const tbody = document.getElementById('ordersTable');
+            
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">No orders found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = orders.map(o => `
+                <tr>
+                    <td><strong>#${o.id || 'N/A'}</strong></td>
+                    <td>${o.wholesaler_name || 'N/A'}</td>
+                    <td>${o.retailer_name || 'N/A'}</td>
+                    <td><strong>₹${o.total_amount ? parseFloat(o.total_amount).toFixed(2) : '0.00'}</strong></td>
+                    <td><span class="status-badge ${o.status === 'completed' ? 'completed' : 'pending'}">${o.status || 'Pending'}</span></td>
+                    <td>${o.created_at ? new Date(o.created_at).toLocaleDateString() : 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // User Actions
+        function viewUser(userId, userType) {
+            alert(`View ${userType} #${userId}\n\nThis would open a detailed view in a real application.`);
+        }
+
+        function suspendUser(userId, userType) {
+            if (confirm(`Are you sure you want to suspend/activate this ${userType}?`)) {
+                alert(`${userType} #${userId} status changed.\n\nIn a real application, this would call an API.`);
+                // Reload the data
+                if (userType === 'wholesaler') {
+                    loadWholesalers();
+                } else {
+                    loadRetailers();
+                }
             }
         }
 
-        function addUser() {
-            // Implement add user functionality
-            alert('Add User functionality - to be implemented');
-        }
-
-        function editUser(userId) {
-            // Implement edit user functionality
-            alert(`Edit User ${userId} - to be implemented`);
-        }
-
-        function deleteUser(userId) {
-            if (confirm('Are you sure you want to delete this user?')) {
-                // Implement delete user functionality
-                alert(`Delete User ${userId} - to be implemented`);
+        function deleteUser(userId, userType) {
+            if (confirm(`Are you sure you want to delete this ${userType}? This action cannot be undone.`)) {
+                alert(`${userType} #${userId} deleted.\n\nIn a real application, this would call a DELETE API.`);
+                loadRetailers();
             }
         }
 
-        function viewProduct(productId) {
-            // Implement view product functionality
-            alert(`View Product ${productId} - to be implemented`);
-        }
-
-        function deleteProduct(productId) {
-            if (confirm('Are you sure you want to delete this product?')) {
-                // Implement delete product functionality
-                alert(`Delete Product ${productId} - to be implemented`);
-            }
-        }
-
-        function logout() {
+        // Logout
+        async function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                window.location.href = '/login';
+                try {
+                    const response = await fetch('/api/auth/logout', { method: 'POST' });
+                    if (response.ok) {
+                        window.location.href = '/login';
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    window.location.href = '/login';
+                }
             }
-        }
-
-        function showAlert(message, type = 'info') {
-            // Simple alert implementation - can be enhanced with toast notifications
-            alert(message);
         }
     </script>
 </body>

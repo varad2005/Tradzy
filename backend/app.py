@@ -43,24 +43,18 @@ def create_app(config_class: type[Config] = Config) -> Flask:
 
     app.config.from_object(config_class)
     
-    # FIX 1: Ensure SECRET_KEY is set from environment or use a fixed fallback
-    # This is CRITICAL - without a consistent SECRET_KEY, sessions will be invalidated
+    # Ensure SECRET_KEY is set from environment or use a fixed fallback
     if not app.config.get('SECRET_KEY'):
         app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production-12345')
     
-    # FIX 2: Session configuration for development - proper settings for localhost
-    # Use Flask's built-in session (client-side signed cookies) instead of filesystem
-    app.config['SESSION_COOKIE_HTTPONLY'] = True   # Security: prevent XSS attacks
-    app.config['SESSION_COOKIE_SECURE'] = False     # Allow HTTP for localhost
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'   # Allow same-site navigation
+    # Session configuration for development - proper settings for localhost
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SECURE'] = False
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SESSION_COOKIE_NAME'] = 'tradzy_session'
-    app.config['SESSION_COOKIE_DOMAIN'] = None      # Use None for localhost compatibility
+    app.config['SESSION_COOKIE_DOMAIN'] = None
     app.config['SESSION_COOKIE_PATH'] = '/'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
-    # REMOVED: SESSION_TYPE = 'filesystem' - use Flask's default client-side sessions
-    
-    # Enable debug mode
-    app.config['DEBUG'] = True
 
     # Configure CORS for API routes only
     CORS(
@@ -74,6 +68,14 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     )
 
     JWTManager(app)
+
+    # Initialize email subsystem (Flask-Mail)
+    try:
+        from email_utils import init_mail
+        init_mail(app)
+    except Exception as _:
+        # Log but don't crash the app if mail subsystem cannot be initialized
+        app.logger.warning('Could not initialize mail subsystem (Flask-Mail). Emails may not be sent.')
 
     # Apply basic security headers when running in production
     force_https = app.config.get("SESSION_COOKIE_SECURE", False)
@@ -111,13 +113,6 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     @app.before_request
     def ensure_database_exists():
         """Ensure database tables exist before handling any request."""
-        # FIX 5: Enhanced debug logging for session troubleshooting
-        print(f"\n=== REQUEST: {request.method} {request.path} ===")
-        print(f"Session data: {dict(session)}")
-        print(f"Session modified: {session.modified}")
-        print(f"Cookies received: {dict(request.cookies)}")
-        print(f"====================================\n")
-        
         # Only check once per application instance
         if not hasattr(app, '_database_initialized'):
             try:
@@ -126,17 +121,6 @@ def create_app(config_class: type[Config] = Config) -> Flask:
             except Exception as e:
                 app.logger.error(f"Database initialization error: {e}")
                 # Don't block requests, but log the error
-
-    # FIX 6: Add after_request handler to debug response cookies
-    @app.after_request
-    def debug_response_cookies(response):
-        """Debug response cookies being sent."""
-        print(f"\n=== RESPONSE for {request.path} ===")
-        print(f"Status: {response.status}")
-        print(f"Set-Cookie headers: {response.headers.getlist('Set-Cookie')}")
-        print(f"Session after request: {dict(session)}")
-        print(f"====================================\n")
-        return response
 
     @app.teardown_appcontext
     def teardown_db(exception: BaseException | None) -> None:  # pragma: no cover - teardown
@@ -148,6 +132,15 @@ def create_app(config_class: type[Config] = Config) -> Flask:
             "api_base_url": os.getenv("PUBLIC_API_BASE_URL", "/api"),
             "app_name": "TRADZY",
         }
+
+    # Simple frontend routes for role-specific signup pages
+    @app.route('/signup/retailer')
+    def signup_retailer():
+        return render_template('signup_retailer.html')
+
+    @app.route('/signup/wholesaler')
+    def signup_wholesaler():
+        return render_template('signup_wholesaler.html')
 
     @app.route("/")
     def serve_index() -> str:
@@ -197,36 +190,22 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         Only accessible to users with 'admin' role.
         Redirects to login if not authenticated or wrong role.
         """
-        print(f"\n=== ADMIN DASHBOARD ACCESS ATTEMPT ===")
-        print(f"Session data: {dict(session)}")
-        print(f"Session keys: {list(session.keys())}")
-        print(f"user_id in session: {'user_id' in session}")
-        print(f"role in session: {session.get('role')}")
-        print(f"Cookies: {dict(request.cookies)}")
-        print(f"======================================\n")
-        
         if "user_id" not in session:
-            print("ADMIN DASHBOARD: No user_id, redirecting to login")
             return redirect(url_for("serve_admin_login"))
         
         if session.get("role") != "admin":
-            print(f"ADMIN DASHBOARD: Wrong role '{session.get('role')}', redirecting to login")
             return redirect(url_for("serve_admin_login"))
         
-        print("ADMIN DASHBOARD: Access granted, rendering template")
         return render_template("admin_dashboard.html")
 
     @app.route("/retailer")
+    @app.route("/retailer-dashboard")
     def retailer_dashboard():
         """Serve the retailer dashboard page.
         
         Only accessible to users with 'retailer' role.
         Redirects to login if not authenticated or wrong role.
         """
-        print(f"\n=== RETAILER DASHBOARD ACCESS ATTEMPT ===")
-        print(f"Session data: {dict(session)}")
-        print(f"======================================\n")
-        
         if "user_id" not in session:
             return redirect(url_for("serve_login"))
         
@@ -235,6 +214,51 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         
         return render_template("retailer_dashboard.html")
 
+    @app.route("/retailer/cart")
+    def retailer_cart():
+        """Serve the retailer cart page.
+        
+        Only accessible to users with 'retailer' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        if "user_id" not in session:
+            return redirect(url_for("serve_login"))
+        
+        if session.get("role") != "retailer":
+            return redirect(url_for("serve_login"))
+        
+        return render_template("retailer_cart.html")
+
+    @app.route("/retailer/orders")
+    def retailer_orders():
+        """Serve the retailer orders page.
+        
+        Only accessible to users with 'retailer' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        if "user_id" not in session:
+            return redirect(url_for("serve_login"))
+        
+        if session.get("role") != "retailer":
+            return redirect(url_for("serve_login"))
+        
+        return render_template("retailer_orders.html")
+
+    @app.route("/retailer/wishlist")
+    def retailer_wishlist():
+        """Serve the retailer wishlist page.
+        
+        Only accessible to users with 'retailer' role.
+        Redirects to login if not authenticated or wrong role.
+        """
+        if "user_id" not in session:
+            return redirect(url_for("serve_login"))
+        
+        if session.get("role") != "retailer":
+            return redirect(url_for("serve_login"))
+        
+        return render_template("retailer_wishlist.html")
+
     @app.route("/wholesaler/dashboard")
     def wholesaler_dashboard():
         """Serve the wholesaler dashboard page.
@@ -242,10 +266,6 @@ def create_app(config_class: type[Config] = Config) -> Flask:
         Only accessible to users with 'wholesaler' role.
         Redirects to login if not authenticated or wrong role.
         """
-        print(f"\n=== WHOLESALER DASHBOARD ACCESS ATTEMPT ===")
-        print(f"Session data: {dict(session)}")
-        print(f"======================================\n")
-        
         if "user_id" not in session:
             return redirect(url_for("serve_login"))
         
@@ -325,7 +345,8 @@ app = create_app()
 
 if __name__ == "__main__":
     app.run(
-        host=os.getenv("HOST", "0.0.0.0"),
+        # Bind to the IPv4 loopback by default to avoid IPv6/localhost resolution issues on Windows
+        host=os.getenv("HOST", "127.0.0.1"),
         port=int(os.getenv("PORT", "5000")),
         debug=app.config.get("DEBUG", False),
     )

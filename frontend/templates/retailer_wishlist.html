@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - TRADZY</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --amazon-orange: #FF9900;
+            --amazon-dark: #131921;
+            --amazon-light: #232F3E;
+            --amazon-blue: #146EB4;
+            --bg-gray: #EAEDED;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            font-family: 'Amazon Ember', Arial, sans-serif;
+        }
+
+        .top-header {
+            background-color: var(--amazon-dark);
+            color: white;
+            padding: 0.5rem 0;
+        }
+
+        .navbar {
+            background-color: var(--amazon-light);
+            padding: 0.75rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            color: white !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        .nav-link:hover {
+            border: 1px solid white;
+            border-radius: 2px;
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            color: var(--amazon-dark);
+        }
+
+        .wishlist-count {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .wishlist-card {
+            background: white;
+            border-radius: 4px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .wishlist-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .remove-btn:hover {
+            background-color: #FEF5F5;
+            border-color: #B12704;
+            color: #B12704;
+        }
+
+        .product-image-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .product-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .product-image-container i {
+            font-size: 4rem;
+            color: #ccc;
+        }
+
+        .product-title {
+            font-size: 1rem;
+            color: var(--amazon-dark);
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 3rem;
+            font-weight: 500;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            color: #B12704;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price .currency {
+            font-size: 0.75rem;
+            vertical-align: super;
+        }
+
+        .stock-status {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .stock-status.in-stock {
+            color: #007600;
+        }
+
+        .stock-status.out-of-stock {
+            color: #B12704;
+        }
+
+        .btn-add-cart {
+            background-color: #FFD814;
+            border: 1px solid #FCD200;
+            border-radius: 20px;
+            color: var(--amazon-dark);
+            width: 100%;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-add-cart:hover {
+            background-color: #F7CA00;
+        }
+
+        .btn-add-cart:disabled {
+            background-color: #ddd;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .empty-wishlist {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .empty-wishlist i {
+            font-size: 5rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--amazon-orange);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .custom-toast {
+            min-width: 300px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .custom-toast.success {
+            border-left: 4px solid #007600;
+        }
+
+        .custom-toast.error {
+            border-left: 4px solid #B12704;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-white small">
+                    <i class="fas fa-user-circle me-1"></i>
+                    <span id="userGreeting">Hello, Retailer</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="/retailer-dashboard">
+                <i class="fas fa-store me-2"></i>TRADZY
+            </a>
+
+            <div class="d-flex align-items-center">
+                <a href="/retailer-dashboard" class="nav-link">
+                    <i class="fas fa-home me-1"></i> Shop
+                </a>
+                <a href="/retailer/orders" class="nav-link">
+                    <i class="fas fa-box me-1"></i> Orders
+                </a>
+                <a href="/retailer/cart" class="nav-link">
+                    <i class="fas fa-shopping-cart me-1"></i> Cart
+                </a>
+                <a href="/retailer/wishlist" class="nav-link">
+                    <i class="fas fa-heart me-1"></i> Wishlist
+                </a>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i> Account
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h2><i class="fas fa-heart me-2"></i>My Wishlist</h2>
+            <div class="wishlist-count" id="wishlistCount">0 items</div>
+        </div>
+
+        <div id="wishlistContainer">
+            <div class="loading">
+                <div class="spinner-border" role="status"></div>
+                <p class="mt-3">Loading your wishlist...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let wishlistData = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserInfo();
+            loadWishlist();
+        });
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/auth/check-auth');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.authenticated && data.user) {
+                        document.getElementById('userGreeting').textContent = `Hello, ${data.user.username}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        async function loadWishlist() {
+            try {
+                const response = await fetch('/api/wishlist');
+                if (response.ok) {
+                    wishlistData = await response.json();
+                    renderWishlist();
+                } else {
+                    showToast('Error loading wishlist', 'error');
+                    renderEmptyWishlist();
+                }
+            } catch (error) {
+                console.error('Error loading wishlist:', error);
+                showToast('Error connecting to server', 'error');
+                renderEmptyWishlist();
+            }
+        }
+
+        function renderWishlist() {
+            const container = document.getElementById('wishlistContainer');
+            const countElement = document.getElementById('wishlistCount');
+
+            if (!wishlistData || !wishlistData.items || wishlistData.items.length === 0) {
+                renderEmptyWishlist();
+                countElement.textContent = '0 items';
+                return;
+            }
+
+            countElement.textContent = `${wishlistData.items.length} item${wishlistData.items.length !== 1 ? 's' : ''}`;
+
+            const html = `
+                <div class="wishlist-grid">
+                    ${wishlistData.items.map(item => renderWishlistCard(item)).join('')}
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderWishlistCard(item) {
+            const isInStock = item.stock > 0;
+            const price = parseFloat(item.price);
+
+            return `
+                <div class="wishlist-card">
+                    <button class="remove-btn" onclick="removeFromWishlist(${item.id}, '${item.name.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="product-image-container">
+                        ${item.image_url 
+                            ? `<img src="${item.image_url}" alt="${item.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-box\\'></i>'">`
+                            : '<i class="fas fa-box"></i>'}
+                    </div>
+                    <div class="product-title">${item.name}</div>
+                    <div class="product-price">
+                        <span class="currency">₹</span>${price.toFixed(2)}
+                    </div>
+                    <div class="stock-status ${isInStock ? 'in-stock' : 'out-of-stock'}">
+                        ${isInStock ? 'In Stock' : 'Out of Stock'}
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart(${item.product_id}, '${item.name.replace(/'/g, "\\'")}', ${price})" ${!isInStock ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart me-1"></i>Add to Cart
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderEmptyWishlist() {
+            const container = document.getElementById('wishlistContainer');
+            container.innerHTML = `
+                <div class="empty-wishlist">
+                    <i class="fas fa-heart-broken"></i>
+                    <h3>Your wishlist is empty</h3>
+                    <p class="text-muted">Save items you love for later</p>
+                    <a href="/retailer-dashboard" class="btn btn-primary mt-3">
+                        <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+                    </a>
+                </div>
+            `;
+        }
+
+        async function removeFromWishlist(itemId, itemName) {
+            if (!confirm(`Remove "${itemName}" from wishlist?`)) return;
+
+            try {
+                const response = await fetch(`/api/wishlist/items/${itemId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showToast('Item removed from wishlist', 'success');
+                    await loadWishlist();
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error removing item', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+                showToast('Error connecting to server', 'error');
+            }
+        }
+
+        async function addToCart(productId, productName, price) {
+            try {
+                const response = await fetch('/api/cart/items', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 1
+                    })
+                });
+
+                if (response.ok) {
+                    showToast(`"${productName}" added to cart!`, 'success');
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error adding to cart', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showToast('Error connecting to server', 'error');
+            }
+        }
+
+        async function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                window.location.href = '/login';
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `custom-toast ${type}`;
+            
+            const icon = type === 'success' 
+                ? '<i class="fas fa-check-circle me-2" style="color: #007600;"></i>'
+                : '<i class="fas fa-exclamation-circle me-2" style="color: #B12704;"></i>';
+
+            toast.innerHTML = `${icon}<span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

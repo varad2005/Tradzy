@@ -100,13 +100,72 @@ def register() -> tuple[Any, int]:
         return jsonify({"error": "Email already registered"}), 400
 
     password_hash = generate_password_hash(payload["password"])
-    db.execute(
-        "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)",
-        (payload["username"], password_hash, payload["email"], role),
-    )
+    company = payload.get("company")
+    if company is not None:
+        db.execute(
+            "INSERT INTO users (username, password, email, role, company) VALUES (?, ?, ?, ?, ?)",
+            (payload["username"], password_hash, payload["email"], role, company),
+        )
+    else:
+        db.execute(
+            "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)",
+            (payload["username"], password_hash, payload["email"], role),
+        )
     db.commit()
 
     return jsonify({"message": "Registration successful"}), 201
+
+
+@auth_bp.route("/create", methods=["POST"])
+@login_required
+def create_user() -> tuple[Any, int]:
+    """Allow any authenticated user to create a new user account.
+
+    This endpoint is intended for in-app user creation (e.g. a wholesaler
+    or retailer inviting another user). It requires an active session but
+    does not restrict by role.
+    """
+    payload = request.get_json() or {}
+
+    required_fields = {"username", "password", "email"}
+    if not required_fields.issubset(payload.keys()):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    role = payload.get("role", "retailer").lower()
+    if role not in VALID_ROLES:
+        return jsonify({"error": "Invalid role"}), 400
+
+    db = get_db()
+
+    existing_username = db.execute(
+        "SELECT id FROM users WHERE username = ?",
+        (payload["username"],),
+    ).fetchone()
+    if existing_username:
+        return jsonify({"error": "Username already registered"}), 400
+
+    existing_email = db.execute(
+        "SELECT id FROM users WHERE email = ?",
+        (payload["email"],),
+    ).fetchone()
+    if existing_email:
+        return jsonify({"error": "Email already registered"}), 400
+
+    password_hash = generate_password_hash(payload["password"])
+    company = payload.get("company")
+    if company is not None:
+        db.execute(
+            "INSERT INTO users (username, password, email, role, company) VALUES (?, ?, ?, ?, ?)",
+            (payload["username"], password_hash, payload["email"], role, company),
+        )
+    else:
+        db.execute(
+            "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)",
+            (payload["username"], password_hash, payload["email"], role),
+        )
+    db.commit()
+
+    return jsonify({"message": "User created successfully"}), 201
 
 
 @auth_bp.route("/login", methods=["POST"])

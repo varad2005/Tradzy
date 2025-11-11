@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - TRADZY</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --amazon-orange: #FF9900;
+            --amazon-dark: #131921;
+            --amazon-light: #232F3E;
+            --amazon-blue: #146EB4;
+            --bg-gray: #EAEDED;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            font-family: 'Amazon Ember', Arial, sans-serif;
+        }
+
+        /* Amazon-style Header */
+        .top-header {
+            background-color: var(--amazon-dark);
+            color: white;
+            padding: 0.5rem 0;
+        }
+
+        .navbar {
+            background-color: var(--amazon-light);
+            padding: 0.75rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            color: white !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        .nav-link:hover {
+            border: 1px solid white;
+            border-radius: 2px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .cart-header {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .cart-header h2 {
+            margin: 0;
+            color: var(--amazon-dark);
+        }
+
+        .cart-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .cart-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .cart-items {
+            background: white;
+            border-radius: 4px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 1.5rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .item-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .item-image i {
+            font-size: 3rem;
+            color: #ccc;
+        }
+
+        .item-details h5 {
+            margin: 0 0 0.5rem 0;
+            color: var(--amazon-dark);
+        }
+
+        .item-price {
+            color: #B12704;
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin: 0.5rem 0;
+        }
+
+        .item-stock {
+            color: #007600;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
+        .item-stock.out-of-stock {
+            color: #B12704;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .quantity-controls button {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .quantity-controls button:hover {
+            background-color: #f8f9fa;
+        }
+
+        .quantity-controls span {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .item-total {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--amazon-dark);
+        }
+
+        .btn-remove {
+            color: var(--amazon-blue);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
+
+        .btn-remove:hover {
+            color: #C45500;
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background: white;
+            border-radius: 4px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .order-summary h4 {
+            margin: 0 0 1rem 0;
+            color: var(--amazon-dark);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .summary-row.total {
+            border-top: 1px solid #ddd;
+            padding-top: 0.75rem;
+            margin-top: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .btn-checkout {
+            background-color: var(--amazon-orange);
+            border: 1px solid #E77600;
+            border-radius: 8px;
+            color: var(--amazon-dark);
+            width: 100%;
+            padding: 0.75rem;
+            font-weight: 500;
+            font-size: 1rem;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+
+        .btn-checkout:hover {
+            background-color: #F08804;
+        }
+
+        .btn-checkout:disabled {
+            background-color: #ddd;
+            border-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .empty-cart i {
+            font-size: 5rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--amazon-orange);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .custom-toast {
+            min-width: 300px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .custom-toast.success {
+            border-left: 4px solid #007600;
+        }
+
+        .custom-toast.error {
+            border-left: 4px solid #B12704;
+        }
+
+        /* Payment Modal */
+        .payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .payment-modal.show {
+            display: flex;
+        }
+
+        .payment-modal-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .payment-modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .payment-modal-header h3 {
+            margin: 0;
+            color: var(--amazon-dark);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-modal:hover {
+            color: var(--amazon-dark);
+        }
+
+        .payment-modal-body {
+            padding: 1.5rem;
+        }
+
+        .payment-method {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .payment-method:hover {
+            border-color: var(--amazon-orange);
+            background-color: #FFF9F0;
+        }
+
+        .payment-method.selected {
+            border-color: var(--amazon-orange);
+            background-color: #FFF9F0;
+            border-width: 3px;
+        }
+
+        .payment-method input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .payment-method-icon {
+            font-size: 2rem;
+            color: var(--amazon-dark);
+            width: 50px;
+            text-align: center;
+        }
+
+        .payment-method-details {
+            flex: 1;
+        }
+
+        .payment-method-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--amazon-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .payment-method-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .order-summary-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .summary-item.total {
+            border-top: 1px solid #ddd;
+            padding-top: 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .payment-modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn-modal {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-modal.cancel {
+            background-color: white;
+            border: 1px solid #ddd;
+            color: var(--amazon-dark);
+        }
+
+        .btn-modal.cancel:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-modal.confirm {
+            background-color: var(--amazon-orange);
+            color: var(--amazon-dark);
+        }
+
+        .btn-modal.confirm:hover {
+            background-color: #F08804;
+        }
+
+        .btn-modal:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+
+        .payment-form {
+            display: none;
+            margin-top: 1rem;
+            padding: 1.25rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .payment-form.show {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--amazon-dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--amazon-orange);
+        }
+
+        .card-icons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .card-icons i {
+            font-size: 1.5rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-white small">
+                    <i class="fas fa-user-circle me-1"></i>
+                    <span id="userGreeting">Hello, Retailer</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="/retailer-dashboard">
+                <i class="fas fa-store me-2"></i>TRADZY
+            </a>
+
+            <div class="d-flex align-items-center">
+                <a href="/retailer-dashboard" class="nav-link">
+                    <i class="fas fa-home me-1"></i> Shop
+                </a>
+                <a href="/retailer/orders" class="nav-link">
+                    <i class="fas fa-box me-1"></i> Orders
+                </a>
+                <a href="/retailer/cart" class="nav-link">
+                    <i class="fas fa-shopping-cart me-1"></i> Cart
+                </a>
+                <a href="/retailer/wishlist" class="nav-link">
+                    <i class="fas fa-heart me-1"></i> Wishlist
+                </a>
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i> Account
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="cart-header">
+            <h2><i class="fas fa-shopping-cart me-2"></i>Shopping Cart</h2>
+        </div>
+
+        <div id="cartContainer">
+            <div class="loading">
+                <div class="spinner-border" role="status"></div>
+                <p class="mt-3">Loading your cart...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="payment-modal-content">
+            <div class="payment-modal-header">
+                <h3><i class="fas fa-credit-card me-2"></i>Select Payment Method</h3>
+                <button class="close-modal" onclick="closePaymentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="payment-modal-body">
+                <!-- Email Input -->
+                <div class="order-summary-box" style="margin-bottom: 1.5rem;">
+                    <h5 class="mb-3">Contact Information</h5>
+                    <div class="form-group">
+                        <label for="orderEmail" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                            Email Address <span style="color: #B12704;">*</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="orderEmail" 
+                            placeholder="Enter your email for order confirmation" 
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;"
+                            required
+                        >
+                        <small style="display: block; margin-top: 0.5rem; color: #666;">
+                            <i class="fas fa-info-circle"></i> Order confirmation and receipt will be sent to this email
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="order-summary-box">
+                    <h5 class="mb-3">Order Summary</h5>
+                    <div class="summary-item">
+                        <span>Subtotal:</span>
+                        <span id="modalSubtotal">₹0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping:</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>Total Amount:</span>
+                        <span id="modalTotal">₹0.00</span>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <h5 class="mb-3">Choose Payment Method</h5>
+
+                <!-- Cash on Delivery -->
+                <div class="payment-method" onclick="selectPaymentMethod('cod')">
+                    <input type="radio" name="paymentMethod" id="codRadio" value="cod">
+                    <div class="payment-method-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">Cash on Delivery (COD)</div>
+                        <div class="payment-method-desc">Pay with cash when your order is delivered</div>
+                    </div>
+                </div>
+
+                <!-- Credit/Debit Card -->
+                <div class="payment-method" onclick="selectPaymentMethod('card')">
+                    <input type="radio" name="paymentMethod" id="cardRadio" value="card">
+                    <div class="payment-method-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">Credit/Debit Card</div>
+                        <div class="payment-method-desc">Visa, Mastercard, American Express</div>
+                    </div>
+                </div>
+
+                <!-- Card Payment Form -->
+                <div class="payment-form" id="cardPaymentForm">
+                    <div class="form-group">
+                        <label for="cardNumber">Card Number</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                        <div class="card-icons">
+                            <i class="fab fa-cc-visa"></i>
+                            <i class="fab fa-cc-mastercard"></i>
+                            <i class="fab fa-cc-amex"></i>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="cardExpiry">Expiry Date</label>
+                                <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group">
+                                <label for="cardCVV">CVV</label>
+                                <input type="text" id="cardCVV" placeholder="123" maxlength="4">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cardName">Cardholder Name</label>
+                        <input type="text" id="cardName" placeholder="John Doe">
+                    </div>
+                </div>
+
+                <!-- UPI -->
+                <div class="payment-method" onclick="selectPaymentMethod('upi')">
+                    <input type="radio" name="paymentMethod" id="upiRadio" value="upi">
+                    <div class="payment-method-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">UPI</div>
+                        <div class="payment-method-desc">Google Pay, PhonePe, Paytm, BHIM UPI</div>
+                    </div>
+                </div>
+
+                <!-- UPI Payment Form -->
+                <div class="payment-form" id="upiPaymentForm">
+                    <div class="form-group">
+                        <label for="upiId">UPI ID</label>
+                        <input type="text" id="upiId" placeholder="yourname@upi">
+                    </div>
+                </div>
+
+                <!-- Net Banking -->
+                <div class="payment-method" onclick="selectPaymentMethod('netbanking')">
+                    <input type="radio" name="paymentMethod" id="netbankingRadio" value="netbanking">
+                    <div class="payment-method-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">Net Banking</div>
+                        <div class="payment-method-desc">All major banks supported</div>
+                    </div>
+                </div>
+
+                <!-- Net Banking Form -->
+                <div class="payment-form" id="netbankingPaymentForm">
+                    <div class="form-group">
+                        <label for="bankSelect">Select Your Bank</label>
+                        <select id="bankSelect" class="form-control" style="padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">Choose a bank...</option>
+                            <option value="hdfc">HDFC Bank</option>
+                            <option value="icici">ICICI Bank</option>
+                            <option value="sbi">State Bank of India</option>
+                            <option value="axis">Axis Bank</option>
+                            <option value="kotak">Kotak Mahindra Bank</option>
+                            <option value="pnb">Punjab National Bank</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Digital Wallet -->
+                <div class="payment-method" onclick="selectPaymentMethod('wallet')">
+                    <input type="radio" name="paymentMethod" id="walletRadio" value="wallet">
+                    <div class="payment-method-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="payment-method-details">
+                        <div class="payment-method-title">Digital Wallet</div>
+                        <div class="payment-method-desc">Paytm, Amazon Pay, PhonePe Wallet</div>
+                    </div>
+                </div>
+
+                <!-- Wallet Payment Form -->
+                <div class="payment-form" id="walletPaymentForm">
+                    <div class="form-group">
+                        <label for="walletSelect">Select Wallet</label>
+                        <select id="walletSelect" class="form-control" style="padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="">Choose a wallet...</option>
+                            <option value="paytm">Paytm</option>
+                            <option value="amazonpay">Amazon Pay</option>
+                            <option value="phonepe">PhonePe</option>
+                            <option value="googlepay">Google Pay</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="payment-modal-footer">
+                <button class="btn-modal cancel" onclick="closePaymentModal()">Cancel</button>
+                <button class="btn-modal confirm" id="confirmPaymentBtn" onclick="confirmPayment()" disabled>
+                    Place Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let cartData = null;
+        let selectedPaymentMethod = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserInfo();
+            loadCart();
+
+            // Format card number
+            document.getElementById('cardNumber')?.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '');
+                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formattedValue;
+            });
+
+            // Format expiry date
+            document.getElementById('cardExpiry')?.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                e.target.value = value;
+            });
+
+            // Only allow numbers in CVV
+            document.getElementById('cardCVV')?.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/\D/g, '');
+            });
+        });
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/auth/check-auth');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.authenticated && data.user) {
+                        document.getElementById('userGreeting').textContent = `Hello, ${data.user.username}`;
+                        // Store email in localStorage for easy access
+                        if (data.user.email) {
+                            localStorage.setItem('userEmail', data.user.email);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        async function loadCart() {
+            try {
+                const response = await fetch('/api/cart');
+                if (response.ok) {
+                    cartData = await response.json();
+                    renderCart();
+                } else {
+                    showToast('Error loading cart', 'error');
+                    renderEmptyCart();
+                }
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                showToast('Error connecting to server', 'error');
+                renderEmptyCart();
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartContainer');
+
+            if (!cartData || !cartData.items || cartData.items.length === 0) {
+                renderEmptyCart();
+                return;
+            }
+
+            const html = `
+                <div class="cart-container">
+                    <div class="cart-items">
+                        ${cartData.items.map(item => renderCartItem(item)).join('')}
+                    </div>
+                    <div class="order-summary">
+                        <h4>Order Summary</h4>
+                        <div class="summary-row">
+                            <span>Subtotal (${cartData.items.reduce((sum, item) => sum + item.quantity, 0)} items):</span>
+                            <span>₹${cartData.total.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping:</span>
+                            <span>Free</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total:</span>
+                            <span>₹${cartData.total.toFixed(2)}</span>
+                        </div>
+                        <button class="btn-checkout" onclick="checkout()" ${cartData.items.length === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-lock me-2"></i>Proceed to Checkout
+                        </button>
+                        <div class="text-center mt-3">
+                            <a href="/retailer-dashboard" class="text-decoration-none" style="color: var(--amazon-blue);">
+                                <i class="fas fa-arrow-left me-1"></i>Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderCartItem(item) {
+            const isInStock = item.stock > 0;
+            const itemTotal = (item.price * item.quantity).toFixed(2);
+
+            return `
+                <div class="cart-item">
+                    <div class="item-image">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="item-details">
+                        <h5>${item.name}</h5>
+                        <div class="item-price">₹${parseFloat(item.price).toFixed(2)}</div>
+                        <div class="item-stock ${isInStock ? '' : 'out-of-stock'}">
+                            ${isInStock ? 'In Stock' : 'Out of Stock'}
+                        </div>
+                        <div class="quantity-controls">
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span>${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" ${!isInStock || item.quantity >= item.stock ? 'disabled' : ''}>
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <button class="btn-remove" onclick="removeItem(${item.id}, '${item.name.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-trash me-1"></i>Remove
+                        </button>
+                    </div>
+                    <div class="item-actions">
+                        <div class="item-total">₹${itemTotal}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEmptyCart() {
+            const container = document.getElementById('cartContainer');
+            container.innerHTML = `
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Your cart is empty</h3>
+                    <p class="text-muted">Add items to your cart to see them here</p>
+                    <a href="/retailer-dashboard" class="btn btn-primary mt-3">
+                        <i class="fas fa-arrow-left me-2"></i>Start Shopping
+                    </a>
+                </div>
+            `;
+        }
+
+        async function updateQuantity(itemId, newQuantity) {
+            if (newQuantity < 1) return;
+
+            try {
+                const response = await fetch(`/api/cart/items/${itemId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ quantity: newQuantity })
+                });
+
+                if (response.ok) {
+                    await loadCart();
+                    showToast('Quantity updated', 'success');
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error updating quantity', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                showToast('Error connecting to server', 'error');
+            }
+        }
+
+        async function removeItem(itemId, itemName) {
+            if (!confirm(`Remove "${itemName}" from cart?`)) return;
+
+            try {
+                const response = await fetch(`/api/cart/items/${itemId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadCart();
+                    showToast('Item removed from cart', 'success');
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error removing item', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+                showToast('Error connecting to server', 'error');
+            }
+        }
+
+        async function checkout() {
+            if (!cartData || !cartData.items || cartData.items.length === 0) {
+                showToast('Your cart is empty', 'error');
+                return;
+            }
+
+            // Show payment modal
+            openPaymentModal();
+        }
+
+        function openPaymentModal() {
+            // Update modal summary
+            document.getElementById('modalSubtotal').textContent = `₹${cartData.total.toFixed(2)}`;
+            document.getElementById('modalTotal').textContent = `₹${cartData.total.toFixed(2)}`;
+
+            // Pre-fill email if available from user session
+            const emailInput = document.getElementById('orderEmail');
+            if (emailInput && !emailInput.value) {
+                // Try to get email from user data (if available in session/page)
+                const userEmail = getUserEmail();
+                if (userEmail) {
+                    emailInput.value = userEmail;
+                }
+            }
+
+            // Show modal
+            document.getElementById('paymentModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function getUserEmail() {
+            // Try to get email from any available source
+            // This can be populated from the backend when loading user info
+            return localStorage.getItem('userEmail') || '';
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+            
+            // Reset selection
+            selectedPaymentMethod = null;
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.classList.remove('selected');
+            });
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+                radio.checked = false;
+            });
+            document.querySelectorAll('.payment-form').forEach(form => {
+                form.classList.remove('show');
+            });
+            document.getElementById('confirmPaymentBtn').disabled = true;
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+
+            // Update UI
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // Check the radio button
+            document.getElementById(method + 'Radio').checked = true;
+
+            // Hide all payment forms
+            document.querySelectorAll('.payment-form').forEach(form => {
+                form.classList.remove('show');
+            });
+
+            // Show relevant payment form
+            if (method === 'card') {
+                document.getElementById('cardPaymentForm').classList.add('show');
+            } else if (method === 'upi') {
+                document.getElementById('upiPaymentForm').classList.add('show');
+            } else if (method === 'netbanking') {
+                document.getElementById('netbankingPaymentForm').classList.add('show');
+            } else if (method === 'wallet') {
+                document.getElementById('walletPaymentForm').classList.add('show');
+            }
+
+            // Enable confirm button
+            document.getElementById('confirmPaymentBtn').disabled = false;
+        }
+
+        async function confirmPayment() {
+            if (!selectedPaymentMethod) {
+                showToast('Please select a payment method', 'error');
+                return;
+            }
+
+            // Validate email
+            const orderEmail = document.getElementById('orderEmail').value.trim();
+            if (!orderEmail) {
+                showToast('Please enter your email address', 'error');
+                document.getElementById('orderEmail').focus();
+                return;
+            }
+
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(orderEmail)) {
+                showToast('Please enter a valid email address', 'error');
+                document.getElementById('orderEmail').focus();
+                return;
+            }
+
+            // For COD, place order directly
+            if (selectedPaymentMethod === 'cod') {
+                await placeOrder('cod', orderEmail);
+                return;
+            }
+
+            // For other payment methods, validate and process payment
+            if (selectedPaymentMethod === 'card') {
+                if (!validateCardPayment()) {
+                    return;
+                }
+                await processPayment('card', orderEmail);
+            } else if (selectedPaymentMethod === 'upi') {
+                if (!validateUPIPayment()) {
+                    return;
+                }
+                await processPayment('upi', orderEmail);
+            } else if (selectedPaymentMethod === 'netbanking') {
+                if (!validateNetBankingPayment()) {
+                    return;
+                }
+                await processPayment('netbanking', orderEmail);
+            } else if (selectedPaymentMethod === 'wallet') {
+                if (!validateWalletPayment()) {
+                    return;
+                }
+                await processPayment('wallet', orderEmail);
+            }
+        }
+
+        function validateCardPayment() {
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            const cardExpiry = document.getElementById('cardExpiry').value;
+            const cardCVV = document.getElementById('cardCVV').value;
+            const cardName = document.getElementById('cardName').value;
+
+            if (!cardNumber || cardNumber.length < 13) {
+                showToast('Please enter a valid card number', 'error');
+                return false;
+            }
+
+            if (!cardExpiry || cardExpiry.length !== 5) {
+                showToast('Please enter valid expiry date (MM/YY)', 'error');
+                return false;
+            }
+
+            if (!cardCVV || cardCVV.length < 3) {
+                showToast('Please enter valid CVV', 'error');
+                return false;
+            }
+
+            if (!cardName || cardName.trim().length < 3) {
+                showToast('Please enter cardholder name', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateUPIPayment() {
+            const upiId = document.getElementById('upiId').value;
+            if (!upiId || !upiId.includes('@')) {
+                showToast('Please enter a valid UPI ID', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        function validateNetBankingPayment() {
+            const bank = document.getElementById('bankSelect').value;
+            if (!bank) {
+                showToast('Please select a bank', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        function validateWalletPayment() {
+            const wallet = document.getElementById('walletSelect').value;
+            if (!wallet) {
+                showToast('Please select a wallet', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        async function processPayment(method, email) {
+            // Show processing message
+            const confirmBtn = document.getElementById('confirmPaymentBtn');
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing Payment...';
+            confirmBtn.disabled = true;
+
+            // Simulate payment processing (2 seconds)
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Simulate payment success (90% success rate)
+            const paymentSuccess = Math.random() > 0.1;
+
+            if (paymentSuccess) {
+                showToast('Payment successful!', 'success');
+                await placeOrder(method, email);
+            } else {
+                showToast('Payment failed. Please try again.', 'error');
+                confirmBtn.innerHTML = originalText;
+                confirmBtn.disabled = false;
+            }
+        }
+
+        async function placeOrder(paymentMethod, email) {
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        status: 'pending',
+                        payment_method: paymentMethod,
+                        email: email
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    closePaymentModal();
+                    
+                    // Show success message with email confirmation
+                    if (result.email_sent) {
+                        if (paymentMethod === 'cod') {
+                            showToast(`Order placed successfully! Confirmation sent to ${email}`, 'success');
+                        } else {
+                            showToast(`Order placed and payment completed! Confirmation sent to ${email}`, 'success');
+                        }
+                    } else {
+                        if (paymentMethod === 'cod') {
+                            showToast('Order placed successfully! Pay on delivery.', 'success');
+                        } else {
+                            showToast('Order placed and payment completed!', 'success');
+                        }
+                    }
+                    
+                    // Redirect to orders page after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/retailer/orders';
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error placing order', 'error');
+                    
+                    // Reset button
+                    const confirmBtn = document.getElementById('confirmPaymentBtn');
+                    confirmBtn.innerHTML = 'Place Order';
+                    confirmBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error during checkout:', error);
+                showToast('Error connecting to server', 'error');
+                
+                // Reset button
+                const confirmBtn = document.getElementById('confirmPaymentBtn');
+                confirmBtn.innerHTML = 'Place Order';
+                confirmBtn.disabled = false;
+            }
+        }
+
+        async function logout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                window.location.href = '/login';
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `custom-toast ${type}`;
+            
+            const icon = type === 'success' 
+                ? '<i class="fas fa-check-circle me-2" style="color: #007600;"></i>'
+                : '<i class="fas fa-exclamation-circle me-2" style="color: #B12704;"></i>';
+
+            toast.innerHTML = `${icon}<span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -40,9 +40,14 @@ def remove_user(user_id: int) -> tuple[Any, int]:
 def platform_stats() -> tuple[Any, int]:
     db = get_db()
 
-    user_totals = db.execute(
-        "SELECT role, COUNT(*) AS count FROM users GROUP BY role"
-    ).fetchall()
+    # Count wholesalers and retailers
+    wholesalers = db.execute(
+        "SELECT COUNT(*) AS count FROM users WHERE role = 'wholesaler'"
+    ).fetchone()
+    
+    retailers = db.execute(
+        "SELECT COUNT(*) AS count FROM users WHERE role = 'retailer'"
+    ).fetchone()
 
     total_products = db.execute("SELECT COUNT(*) AS total FROM products").fetchone()
     total_orders = db.execute("SELECT COUNT(*) AS total FROM orders").fetchone()
@@ -53,7 +58,8 @@ def platform_stats() -> tuple[Any, int]:
     return (
         jsonify(
             {
-                "users": [dict(row) for row in user_totals],
+                "wholesalers": wholesalers["count"] if wholesalers else 0,
+                "retailers": retailers["count"] if retailers else 0,
                 "products": total_products["total"] if total_products else 0,
                 "orders": total_orders["total"] if total_orders else 0,
                 "revenue": total_revenue["revenue"] if total_revenue else 0,
@@ -63,6 +69,63 @@ def platform_stats() -> tuple[Any, int]:
     )
 
 
+@admin_bp.get("/wholesalers")
+@login_required
+@role_required(["admin"])
+def list_wholesalers() -> tuple[Any, int]:
+    db = get_db()
+    wholesalers = db.execute(
+        """
+        SELECT u.id, u.username, u.email, u.created_at, 
+               COUNT(DISTINCT p.id) AS products_count,
+               1 AS is_active
+        FROM users u
+        LEFT JOIN products p ON p.retailer_id = u.id
+        WHERE u.role = 'wholesaler'
+        GROUP BY u.id
+        ORDER BY u.created_at DESC
+        """
+    ).fetchall()
+    
+    return jsonify([{
+        "id": w["id"],
+        "username": w["username"],
+        "email": w["email"],
+        "company": w["username"],  # Using username as company for now
+        "products_count": w["products_count"],
+        "is_active": w["is_active"],
+        "created_at": w["created_at"]
+    } for w in wholesalers]), 200
+
+
+@admin_bp.get("/retailers")
+@login_required
+@role_required(["admin"])
+def list_retailers() -> tuple[Any, int]:
+    db = get_db()
+    retailers = db.execute(
+        """
+        SELECT u.id, u.username, u.email, u.created_at,
+               COUNT(DISTINCT o.id) AS orders_count,
+               1 AS is_active
+        FROM users u
+        LEFT JOIN orders o ON o.user_id = u.id
+        WHERE u.role = 'retailer'
+        GROUP BY u.id
+        ORDER BY u.created_at DESC
+        """
+    ).fetchall()
+    
+    return jsonify([{
+        "id": r["id"],
+        "username": r["username"],
+        "email": r["email"],
+        "orders_count": r["orders_count"],
+        "is_active": r["is_active"],
+        "created_at": r["created_at"]
+    } for r in retailers]), 200
+
+
 @admin_bp.get("/orders")
 @login_required
 @role_required(["admin"])
@@ -70,11 +133,16 @@ def list_orders() -> tuple[Any, int]:
     db = get_db()
     orders = db.execute(
         """
-        SELECT o.id, o.user_id AS buyer_id, u.username AS buyer_username, o.total_amount,
-               o.status, o.created_at, COUNT(oi.id) AS item_count
+        SELECT o.id, o.user_id AS buyer_id, 
+               retailer.username AS retailer_name,
+               wholesaler.username AS wholesaler_name,
+               o.total_amount, o.status, o.created_at,
+               COUNT(oi.id) AS item_count
         FROM orders o
-        LEFT JOIN users u ON o.user_id = u.id
+        LEFT JOIN users retailer ON o.user_id = retailer.id
         LEFT JOIN order_items oi ON oi.order_id = o.id
+        LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN users wholesaler ON p.retailer_id = wholesaler.id
         GROUP BY o.id
         ORDER BY o.created_at DESC
         """

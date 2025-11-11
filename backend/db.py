@@ -62,6 +62,17 @@ def check_and_create_tables() -> None:
             current_app.logger.info("Database initialized successfully!")
         else:
             current_app.logger.info("Database tables already exist.")
+            # Ensure `company` column exists on users table (backfill migration)
+            try:
+                cursor.execute("PRAGMA table_info(users)")
+                cols = [row[1] for row in cursor.fetchall()]
+                if 'company' not in cols:
+                    current_app.logger.info("Adding 'company' column to users table...")
+                    cursor.execute("ALTER TABLE users ADD COLUMN company TEXT")
+                    db.commit()
+                    current_app.logger.info("'company' column added successfully.")
+            except sqlite3.Error as e:
+                current_app.logger.error(f"Error during users table migration: {e}")
             
     except sqlite3.Error as e:
         current_app.logger.error(f"Database error during table check: {e}")
